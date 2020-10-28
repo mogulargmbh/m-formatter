@@ -16,7 +16,15 @@ export class TextAstSerializer extends BaseAstSerializer<WritableTokenPosition, 
   }
   visit(n: ExtendedNode): string
   {
-    let result = this.moveCursor(n.tokenRange.positionStart);
+    let result = "";
+    for(let c of n.leadingComments)
+    {
+      result += this.moveCursor(c.positionStart);
+      result += c.text;
+      result += this.moveCursor(c.positionEnd);
+    }
+    
+    result = this.moveCursor(n.tokenRange.positionStart);
     
     if(n.isLeaf === true)
     {
@@ -26,12 +34,6 @@ export class TextAstSerializer extends BaseAstSerializer<WritableTokenPosition, 
     }
     else
     {
-      for(let c of n.leadingComments)
-      {
-        result += this.moveCursor(c.positionStart);
-        result += c.text;
-        result += this.moveCursor(c.positionEnd);
-      }
       for(let c of n.children)
       {
         result += this.visit(c); 
