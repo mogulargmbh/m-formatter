@@ -1,3 +1,5 @@
+This is not an official microsoft repository. There is an official microsoft [powerquery-formatter](https://github.com/microsoft/powerquery-formatter). This formatter aims to provide more configuration options and minimal unnecessary line breaks.
+
 # Setup and debug
 - build
   - `npm install`
