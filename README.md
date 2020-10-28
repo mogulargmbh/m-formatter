@@ -42,13 +42,14 @@
       - Contains all logic specific to formatting one or many NodeKinds that share the exact same children. This is where the breaking behavior is defined. 
       - **_formatInline()** contains logic for formatting the node in a single line. Note that a Node of kind AlwaysBreaking does not support _formatInline()
         - the _formatInline() function is a generator that yields FormatResults. That way whenever a result **FormatResult.Break** or **FormatResult.ExceedsLine** is encountered the formatting process can be aborted and the parent can continue with _formatBroken()
-      - **_formatBroken()** contains logic for formatting the node when it decided to break line. Note that a Node of kind AlwaysInline does not support _formatBroken()
+      - **_formatBroken()** contains logic for formatting the node when it decided to break line. Note that a Node of kind AlwaysInline does not support _formatBroken(). Also note that when all Nodes that support breaking are breaking line it's still possible for children to exceed line length. For example if a single string literal has greater length than the line width it's not possible to make it not exceed the line width with any breaking behavior.
       - **_children()** enumerates the children nodes. Note that it's ok to yield children that may be null. In initialize() the **children** property is filled with `Array.from(this._children()).filter(c => c != null)`
       - The big switch case that returns the appropriate IPrivateNodeExtension implementation resides in **Factory.ts**
   - after formatting all nodes contain a newly computed range. To update the tokenRange with the computed range values call *root.updateTokenRange()*. This will update the original token range that was emitted from the parser and also handles wsBefore and wsAfter correctly.
   - now the formatted node can be serialized using an **IAstSerializer**. There are two options
     - **HtmlAstSerializer**: emits HTML
     - **TextAstSerializer**: emits Text (currently not very well tested)
-    
+- For examples look at **./test**
+
 # TODO
 This formatter is not totally finished. It's actually a rewrite of the first version that I built and that is currently accessible at [powerqueryformatter.com](https://www.powerqueryformatter.com). There are still some issues with this newer, much faster and more structured version. For example comments are still causing some problems and some test cases don't pass. Also the configuration parameters are not implemented at the moment! I will get back to fixing that once I return from holidays. Also have a look at the open issues.

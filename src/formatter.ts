@@ -46,7 +46,7 @@ export function format(code: string, formatterConfig: Optional<IFormatterConfig>
       indent: 0,
       suppressInitialLineBreak: true,
     }
-    let r = extended.format(state);
+    let r = extended.format(state); //TODO: result relevant?
     extended.updateTokenRange();
     return extended;
   }
