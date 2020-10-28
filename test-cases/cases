@@ -1,0 +1,1334 @@
+---0
+
+let
+    Quelle = DateTime.FixedLocalNow(),
+    #"In Tabelle konvertiert" = #table(1, {{Quelle}}),
+    #"Umbenannte Spalten" = Table.RenameColumns(#"In Tabelle konvertiert",{{"Column1", "LastUpdateTS"}}),
+    #"Geänderter Typ" = Table.TransformColumnTypes(#"Umbenannte Spalten",{{"LastUpdateTS", type datetime}}),
+    #"Hinzugefügte benutzerdefinierte Spalte" = Table.AddColumn(#"Geänderter Typ", "LastUpdateDate", each DateTime.Date([LastUpdateTS])),
+    #"Geänderter Typ1" = Table.TransformColumnTypes(#"Hinzugefügte benutzerdefinierte Spalte",{{"LastUpdateDate", type date}})
+in
+    #"Geänderter Typ1"
+
+---1
+
+let
+    Quelle = Access.Database(File.Contents("C:\Users\hg\Desktop\AWC_2014.accdb"), [CreateNavigationProperties=true]),
+    _Sales_SalesOrderHeader = Quelle{[Schema="",Item="Sales_SalesOrderHeader"]}[Data],
+    #"Andere entfernte Spalten" = Table.SelectColumns(_Sales_SalesOrderHeader,{"SalesOrderID", "OrderDate", "CustomerID", "SubTotal", "TotalDue"})
+in
+    #"Andere entfernte Spalten"
+
+---2
+
+let
+    MyFunc = (x ,y as text) => "nothing"
+in
+    MyFunc
+
+---3
+
+let
+    Quelle = DateTime.FixedLocalNow(),
+    #"Result" = #table(
+       type table[
+           #"Update TS" = datetime,
+           #"Update Date"=date,
+           #"Update Time"=time
+       ],
+       {
+            {Quelle, DateTime.Date(Quelle), DateTime.Time(Quelle)}
+       }
+    ) 
+in
+    #"Result"
+
+---4
+
+let
+    Quelle = List.Dates(#date(2018,1,1),365,#duration(1,0,0,0))
+in
+    Quelle
+
+---5
+
+(year as number) =>
+    let
+        M = 24, //Konstante für die Jahre 2000-2099
+        N = 5,  //Konstante für die Jahre 2000-2099
+        a = Number.Mod(year,4),
+        b = Number.Mod(year,7),
+        c = Number.Mod(year,19),
+        d = Number.Mod(19 * c + M,30),
+        e = Number.Mod(2 * a + 4*b + 6*d + N,7),
+        f = Number.IntegerDivide(c+11*d+22*e,451),
+        res1 = 22 + d +e -7*f,
+        easter = if res1 > 31 then #date(year, 4,(d + e - 7*f -9)) else #date(year,3,res1)
+    in
+        easter as date
+
+---6
+
+result = List.Generate(() => [PageNumber=0, Func=null],
+    each (try _[Func])[HasError]=false,
+    each [PageNumber = _[PageNumber] + 1, 
+        Func=fnNbaPlayerForPage([PageNumber]+1)],
+    each _[Func])
+
+---7
+
+let
+    Quelle = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("bdJbCoQwDIXhrQw+D5Kc2ttsRdz/NsbaPJyagC+mfBB+cp4bRMv23VB3Sfv4+Qh+Ivd3T5PsKq/p9X1QHagYqozQDVWH2njOhtqCmqHmUB+LqKG+oGqovxFskQdBFpQn4qkhnYtMpEsINaQOgeoBUT2eGkpUDymqx1NDB4XAEYXgqaE8F5koL6gYyg4VrlfCeu4iULleDeu5i0DjEC0M4S4Cnc4IPTojuItIQvWSRPV4el1/", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type text) meta [Serialized.Text = true]) in type table [Jahr = _t, StartSommerzeit = _t, StartWinterzeit = _t]),
+    #"Geänderter Typ" = Table.TransformColumnTypes(Quelle,{{"Jahr", Int64.Type}, {"StartSommerzeit", type datetime}, {"StartWinterzeit", type datetime}})
+in
+    #"Geänderter Typ"
+
+---8
+
+let
+    Quelle = ""
+in
+    Quelle
+
+---9
+
+let
+    MyFunc = (x ,y as nullable text) => "nothing"
+in
+    MyFunc
+
+---10
+
+let
+    Quelle = List.Dates(#date(2018,1,1),365,#duration(1,0,0,0)),
+    #"In Tabelle konvertiert" = Table.FromList(Quelle, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Umbenannte Spalten" = Table.RenameColumns(#"In Tabelle konvertiert",{{"Column1", "Datum"}}),
+    #"Geänderter Typ" = Table.TransformColumnTypes(#"Umbenannte Spalten",{{"Datum", type date}}),
+    #"Add Jahr" = Table.AddColumn(#"Geänderter Typ", "Jahr", each Date.Year([Datum])),
+    #"Add Monat" = Table.AddColumn(#"Add Jahr", "Monat", each Date.Month([Datum])),
+    #"Add Monatsname" = Table.AddColumn(#"Add Monat", "Monatsname", each Date.ToText([Datum],"MMMM")),
+    #"Add MonatsnameKurz" = Table.AddColumn(#"Add Monatsname", "MonatsnameKurz", each Date.ToText([Datum],"MMM")),
+    #"Add YYYYMM" = Table.AddColumn(#"Add MonatsnameKurz", "YYYYMM", each Number.ToText([Jahr]) & Date.ToText([Datum],"MM")),
+    #"Add YYYY/MMMM" = Table.AddColumn(#"Add YYYYMM", "YYYY/MMMM", each Number.ToText([Jahr]) & "/" & [Monatsname]),
+    #"Add YYYY/MMM" = Table.AddColumn(#"Add YYYY/MMMM", "YYYY/MMM", each Number.ToText([Jahr]) & "/" & [MonatsnameKurz]),
+    #"Add Quartal" = Table.AddColumn(#"Add YYYY/MMM", "Quartal", each Date.QuarterOfYear([Datum])),
+    #"Add Quartalname" = Table.AddColumn(#"Add Quartal", "Quartalname", each "Q" & Number.ToText([Quartal])),
+    #"Add YYYYQ" = Table.AddColumn(#"Add Quartalname", "YYYYQ", each Number.ToText([Jahr]) & Number.ToText([Quartal])),
+    #"Add YYYY/Q" = Table.AddColumn(#"Add YYYYQ", "YYYY/Q", each Number.ToText([Jahr]) & "/" & [Quartalname]),
+    #"Add Kalenderwoche" = Table.AddColumn(#"Add YYYY/Q", "Kalenderwoche", each Date.WeekOfYear([Datum],Day.Monday)),
+    #"Add Wochentag" = Table.AddColumn(#"Add Kalenderwoche", "Wochentag", each Date.DayOfWeek([Datum],Day.Monday)),
+    #"Add WochentagName" = Table.AddColumn(#"Add Wochentag", "WochentagName", each Date.DayOfWeekName([Datum])),
+    #"Add WochentagNameKurz" = Table.AddColumn(#"Add WochentagName", "WochentagNameKurz", each Date.ToText([Datum],"ddd")),
+    #"Geänderter Typ1" = Table.TransformColumnTypes(#"Add WochentagNameKurz",{{"Jahr", Int64.Type}, {"Monat", Int64.Type}, {"Monatsname", type text}, {"MonatsnameKurz", type text}, {"YYYYMM", Int64.Type}, {"YYYY/MMMM", type text}, {"YYYY/MMM", type text}, {"Quartal", Int64.Type}, {"Quartalname", type text}, {"YYYYQ", Int64.Type}, {"YYYY/Q", type text}, {"Kalenderwoche", Int64.Type}, {"Wochentag", Int64.Type}, {"WochentagName", type text}, {"WochentagNameKurz", type text}})
+in
+    #"Geänderter Typ1"
+
+---11
+
+(fromYear as number, toYear as number) =>
+let
+    getEasterDate = (year as number) =>
+    let
+        M = 24, 
+        N = 5, 
+        a = Number.Mod(year,4),
+        b = Number.Mod(year,7),
+        c =  Number.Mod(year,19),
+        d = Number.Mod(19 * c + M,30),
+        e = Number.Mod(2 * a + 4*b + 6*d + N,7),
+        f = Number.IntegerDivide(c+11*d+22*e,451),
+        res1 = 22 + d +e -7*f,
+        easter = if res1 > 31 then #date(year, 4,(d + e - 7*f -9)) else #date(year,3,res1)
+    in
+        easter as date,
+
+    getFeiertage4Year = (year as number) =>
+    let
+        easterDate = getEasterDate(year),
+        resTable = #table(
+            {"Datum", "Feiertag"},
+            {
+                {#date(year,1,1),"Neujahr"},
+                {Date.AddDays(easterDate,-2) ,"Karfreitag"},
+                {easterDate ,"Ostern"},
+                {Date.AddDays(easterDate,1) ,"Ostermontag"},
+                {Date.AddDays(easterDate,39) ,"Christi Himmelfahrt"},
+                {Date.AddDays(easterDate,49) ,"Pfingsten"},
+                {Date.AddDays(easterDate,50) ,"Pfingstmontag"},
+                {#date(year,5,1),"Tag der Arbeit"},
+                {#date(year,10,3),"Tag der deutschen Einheit"},
+                {#date(year,12,25),"erster Weihnachtsfeiertag"},
+                {#date(year,12,26),"zweiter Weihnachtsfeiertag"}
+            }
+        )
+        in resTable,
+
+    resultList = List.Generate(
+        () => [currentYear = fromYear],
+        (x) => x[currentYear] <= toYear,
+        (x) => [currentYear=x[currentYear]+1],
+        (x)=> getFeiertage4Year(x[currentYear])
+    ),
+
+    convertToTable = Table.FromList(resultList, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    expandCols = Table.ExpandTableColumn(convertToTable, "Column1", {"Datum", "Feiertag"}, {"Datum", "Feiertag"}),
+    resultTable = Table.TransformColumnTypes(expandCols,{{"Datum", type date}, {"Feiertag", type text}})
+
+in
+    resultTable
+
+---12
+
+result = Table.Skip(KonvertierteTabelle,1)
+
+---13
+
+(utcTS as datetime) => 
+let 
+    mezTS = utcTS + #duration(0,1,0,0), // in Winterzeit umrechnen
+    year = Date.Year(DateTime.Date(mezTS)),
+    row = Table.SelectRows(SommerWinterZeit, (curRow) => curRow[Jahr] = year),
+    startOfSummertime = if Table.RowCount(row)=1 then Table.First(row)[StartSommerzeit] else null,
+    endOfSummertime = if Table.RowCount(row)=1 then Table.First(row)[StartWinterzeit] else null,
+    deltaHour = if startOfSummertime <> null and endOfSummertime <> null and mezTS >= startOfSummertime and mezTS < endOfSummertime then 1 else 0,
+    localTS = mezTS + #duration(0,deltaHour,0,0)
+in
+    localTS
+
+---14
+
+let
+    ErsteZahl = 1,
+    ZweiteZahl = 1,
+    Addition = ErsteZahl + ZweiteZahl
+in
+    Addition
+
+---15
+
+let
+    Start = #date(2010,1,1),
+    Ende = #date(2020,12,31),
+    #"Anzahl Tage" = Duration.Days(Ende-Start) + 1,
+    Quelle = List.Dates(Start,#"Anzahl Tage", #duration(1,0,0,0)),
+    #"In Tabelle konvertiert" = Table.FromList(Quelle, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Umbenannte Spalten" = Table.RenameColumns(#"In Tabelle konvertiert",{{"Column1", "Datum"}}),
+    #"Geänderter Typ" = Table.TransformColumnTypes(#"Umbenannte Spalten",{{"Datum", type date}}),
+    #"Add Jahr" = Table.AddColumn(#"Geänderter Typ", "Jahr", each Date.Year([Datum])),
+    #"Add Monat" = Table.AddColumn(#"Add Jahr", "Monat", each Date.Month([Datum])),
+    #"Sortierte Zeilen" = Table.Sort(#"Add Monat",{{"Datum", Order.Descending}})
+in
+    #"Sortierte Zeilen"
+
+---16
+
+result = List.Generate(() => 10, each _ >= 1, each (_-1), each _)
+
+---17
+
+let
+    Quelle = Json.Document(Web.Contents("http://worldtimeapi.org/api/timezone/Europe/Berlin")),
+    #"In Tabelle konvertiert" = Record.ToTable(Quelle),
+    #"Gefilterte Zeilen" = Table.SelectRows(#"In Tabelle konvertiert", each ([Name] = "datetime")),
+    #"Entfernte Spalten" = Table.RemoveColumns(#"Gefilterte Zeilen",{"Name"}),
+    #"Umbenannte Spalten" = Table.RenameColumns(#"Entfernte Spalten",{{"Value", "LastUpdateTS"}}),
+    #"Geänderter Typ" = Table.TransformColumnTypes(#"Umbenannte Spalten",{{"LastUpdateTS", type datetimezone}}),
+    #"Hinzugefügte benutzerdefinierte Spalte" = Table.AddColumn(#"Geänderter Typ", "LastUpdateDate", each DateTime.Date([LastUpdateTS]))
+in
+    #"Hinzugefügte benutzerdefinierte Spalte"
+
+---18
+
+let
+    MyFunc = (x,y) => x + y
+in
+    MyFunc
+
+---19
+
+(startDate as date, endDate as date)=>
+
+let
+    Start = startDate,
+    Ende = endDate,
+    #"Anzahl Tage" = Duration.Days(Ende-Start) + 1,
+    Quelle = List.Dates(Start,#"Anzahl Tage", #duration(1,0,0,0)),
+    #"In Tabelle konvertiert" = Table.FromList(Quelle, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Umbenannte Spalten" = Table.RenameColumns(#"In Tabelle konvertiert",{{"Column1", "Datum"}}),
+    #"Geänderter Typ" = Table.TransformColumnTypes(#"Umbenannte Spalten",{{"Datum", type date}}),
+    #"Add Jahr" = Table.AddColumn(#"Geänderter Typ", "Jahr", each Date.Year([Datum])),
+    #"Add Monat" = Table.AddColumn(#"Add Jahr", "Monat", each Date.Month([Datum])),
+    #"Sortierte Zeilen" = Table.Sort(#"Add Monat",{{"Datum", Order.Descending}})
+in
+    #"Sortierte Zeilen"
+
+---20
+
+result = List.Generate(() => 10,(_) => _ >= 1, (_) => (_-1),(_) => _)
+
+---21
+
+let
+    Quelle = Abfrage2(1, 2)
+in
+    Quelle
+
+---22
+
+result = List.Generate(() => [zahl = 10], 
+    each [zahl] >= 1,
+    each [zahl = [zahl]-1],
+    each [zahl])
+
+---23
+
+let
+    MyFunc = (x as number, y as number) => x + y
+in
+    MyFunc
+
+---24
+
+() => [PageNumber=0, Func=null]
+
+---25
+
+let
+    MyFunc = (netValue as number) => 
+        let
+            MwSt = 0.19,
+            valueAfterTax = netValue * (1 + MwSt)
+        in
+            valueAfterTax
+in
+    MyFunc
+
+---26
+
+each (try _[Func])[HasError]=false
+
+---27
+
+each [PageNumber=_[PageNumber] + 1, Func=fnNbaPlayerForPage([PageNumber]+1)]
+
+---28
+
+each _[Func]
+
+---29
+
+let
+  // Import AU ArTrnDetails db
+  AUSource = Sql.Database("sqlserver.xxxxxx.local", "EncoreCompanyR"),
+  AUdbo_ArTrnDetail = AUSource{[Schema = "dbo", Item = "ArTrnDetail"]}[Data],
+  AUChangeDateTimeToDate = Table.TransformColumnTypes(AUdbo_ArTrnDetail, {
+    {"InvoiceDate", type date}
+  }),
+  AUFilterDatesPerParameter = Table.SelectRows(AUChangeDateTimeToDate, each [InvoiceDate]
+    >= StartTableDates),
+  AURemovedOtherColumns = Table.SelectColumns(AUFilterDatesPerParameter, {
+    "TrnYear", 
+    "TrnMonth", 
+    "Invoice", 
+    "InvoiceDate", 
+    "Branch", 
+    "Salesperson", 
+    "Customer", 
+    "StockCode", 
+    "Area", 
+    "ProductClass", 
+    "Warehouse", 
+    "CustomerClass", 
+    "QtyInvoiced", 
+    "NetSalesValue", 
+    "CostValue", 
+    "GlYear", 
+    "GlPeriod", 
+    "PostCurrency", 
+    "PostConvRate"
+  }),
+  AURemoveICSales = Table.SelectRows(
+    AURemovedOtherColumns, 
+    each  not Text.StartsWith([Branch], "9")
+  ),
+  AUCleanStkCodes = Table.SelectRows(
+    AURemoveICSales, 
+    each  not Text.Contains([StockCode], "Pric") and [StockCode] <> " "
+  ),
+  // Import EU ArTrnDetails db
+  EUSource = Sql.Database("sqlserver.xxxxxx.local", "SysproCompanyE"),
+  EUdbo_ArTrnDetail = EUSource{[Schema = "dbo", Item = "ArTrnDetail"]}[Data],
+  EUChangeDateTimeToDate = Table.TransformColumnTypes(EUdbo_ArTrnDetail, {
+    {"InvoiceDate", type date}
+  }),
+  EUFilterDatesPerParameter = Table.SelectRows(EUChangeDateTimeToDate, each [InvoiceDate]
+    >= StartTableDates),
+  EURemovedOtherColumns = Table.SelectColumns(EUFilterDatesPerParameter, {
+    "TrnYear", 
+    "TrnMonth", 
+    "Invoice", 
+    "InvoiceDate", 
+    "Branch", 
+    "Salesperson", 
+    "Customer", 
+    "StockCode", 
+    "Area", 
+    "ProductClass", 
+    "Warehouse", 
+    "CustomerClass", 
+    "QtyInvoiced", 
+    "NetSalesValue", 
+    "CostValue", 
+    "GlYear", 
+    "GlPeriod", 
+    "PostCurrency", 
+    "PostConvRate"
+  }),
+  EURemoveICSales = Table.SelectRows(
+    EURemovedOtherColumns, 
+    each  not Text.StartsWith([Branch], "9")
+  ),
+  EUCleanStkCodes = Table.SelectRows(
+    EURemoveICSales, 
+    each  not Text.Contains([StockCode], "Pric") and [StockCode] <> " "
+  ),
+  // Import US ArTrnDetails db
+  USSource = Sql.Database("sqlserver.xxxxxx.local", "SysproCompanyU"),
+  USdbo_ArTrnDetail = USSource{[Schema = "dbo", Item = "ArTrnDetail"]}[Data],
+  USChangeDateTimeToDate = Table.TransformColumnTypes(USdbo_ArTrnDetail, {
+    {"InvoiceDate", type date}
+  }),
+  USFilterDatesPerParameter = Table.SelectRows(USChangeDateTimeToDate, each [InvoiceDate]
+    >= StartTableDates),
+  USRemovedOtherColumns = Table.SelectColumns(USFilterDatesPerParameter, {
+    "TrnYear", 
+    "TrnMonth", 
+    "Invoice", 
+    "InvoiceDate", 
+    "Branch", 
+    "Salesperson", 
+    "Customer", 
+    "StockCode", 
+    "Area", 
+    "ProductClass", 
+    "Warehouse", 
+    "CustomerClass", 
+    "QtyInvoiced", 
+    "NetSalesValue", 
+    "CostValue", 
+    "GlYear", 
+    "GlPeriod", 
+    "PostCurrency", 
+    "PostConvRate"
+  }),
+  USRemoveICSales = Table.SelectRows(
+    USRemovedOtherColumns, 
+    each  not Text.StartsWith([Branch], "9")
+  ),
+  USCleanStkCodes = Table.SelectRows(
+    USRemoveICSales, 
+    each  not Text.Contains([StockCode], "Pric") and [StockCode] <> " "
+  ),
+  // Import SI ArTrnDetails db
+  SISource = Sql.Database("sqlserver.xxxxxx.local", "SysproCompanyS"),
+  SIdbo_ArTrnDetail = SISource{[Schema = "dbo", Item = "ArTrnDetail"]}[Data],
+  SIChangeDateTimeToDate = Table.TransformColumnTypes(SIdbo_ArTrnDetail, {
+    {"InvoiceDate", type date}
+  }),
+  SIFilterDatesPerParameter = Table.SelectRows(SIChangeDateTimeToDate, each [InvoiceDate]
+    >= StartTableDates),
+  SIRemovedOtherColumns = Table.SelectColumns(SIFilterDatesPerParameter, {
+    "TrnYear", 
+    "TrnMonth", 
+    "Invoice", 
+    "InvoiceDate", 
+    "Branch", 
+    "Salesperson", 
+    "Customer", 
+    "StockCode", 
+    "Area", 
+    "ProductClass", 
+    "Warehouse", 
+    "CustomerClass", 
+    "QtyInvoiced", 
+    "NetSalesValue", 
+    "CostValue", 
+    "GlYear", 
+    "GlPeriod", 
+    "PostCurrency", 
+    "PostConvRate"
+  }),
+  SIRemoveICSales = Table.SelectRows(
+    SIRemovedOtherColumns, 
+    each  not Text.StartsWith([Branch], "9")
+  ),
+  SICleanStkCodes = Table.SelectRows(
+    SIRemoveICSales, 
+    each  not Text.Contains([StockCode], "Pric") and [StockCode] <> " "
+  ),
+  // Combine above queries
+  CombineAll = Table.Combine({AUCleanStkCodes, EUCleanStkCodes, USCleanStkCodes, SICleanStkCodes}),
+  //Merge Salesperson data
+  LinkSalePersonNameTable = Table.NestedJoin(
+    CombineAll, 
+    {"Branch", "Salesperson"}, 
+    SalSalesperson, 
+    {"Branch", "Salesperson"}, 
+    "SalSalesperson", 
+    JoinKind.LeftOuter
+  ),
+  ShowSalesPersonName = Table.ExpandTableColumn(
+    LinkSalePersonNameTable, 
+    "SalSalesperson", 
+    {"Name"}, 
+    {"SalespersonName"}
+  ),
+  RemoveSalepersonCode = Table.RemoveColumns(ShowSalesPersonName, {"Salesperson"}),
+  // Merge Foreign Exchange data
+  TempChgGlYearToText = Table.TransformColumnTypes(RemoveSalepersonCode, {{"GlYear", type text}}),
+  MergeAUDFx = Table.NestedJoin(
+    TempChgGlYearToText, 
+    {"Branch", "GlYear"}, 
+    CurrencyAUDBase, 
+    {"CompanyCode", "SYSPROYear"}, 
+    "CurrencyAUDBase", 
+    JoinKind.LeftOuter
+  ),
+  SelectCurrencyAUDBase = Table.ExpandTableColumn(MergeAUDFx, "CurrencyAUDBase", {"AUDFx"}, {
+    "AUDFx"
+  }),
+  MergeEURFx = Table.NestedJoin(
+    SelectCurrencyAUDBase, 
+    {"Branch", "GlYear"}, 
+    CurrencyEURBase, 
+    {"CompanyCode", "SYSPROYear"}, 
+    "CurrencyEURBase", 
+    JoinKind.LeftOuter
+  ),
+  SelectCurrencyEURBase = Table.ExpandTableColumn(MergeEURFx, "CurrencyEURBase", {"EURFx"}, {
+    "EURFx"
+  }),
+  MergeUSDFx = Table.NestedJoin(
+    SelectCurrencyEURBase, 
+    {"Branch", "GlYear"}, 
+    CurrencyUSDBase, 
+    {"CompanyCode", "SYSPROYear"}, 
+    "CurrencyUSDBase", 
+    JoinKind.LeftOuter
+  ),
+  SelectCurrencyUSDBase = Table.ExpandTableColumn(MergeUSDFx, "CurrencyUSDBase", {"USDFx"}, {
+    "USDFx"
+  }),
+  // Create FEx values from Base Ccy values
+  CreateNetSaleAUD = Table.AddColumn(SelectCurrencyUSDBase, "NetSaleAUD", each Number.Round(
+    [NetSalesValue] / [AUDFx], 
+    2
+  )),
+  CreateNetSaleEUR = Table.AddColumn(CreateNetSaleAUD, "NetSaleEUR", each Number.Round(
+    [NetSalesValue] / [EURFx], 
+    2
+  )),
+  CreateNetSaleUSD = Table.AddColumn(CreateNetSaleEUR, "NetSaleUSD", each Number.Round(
+    [NetSalesValue] / [USDFx], 
+    2
+  )),
+  CreateNetCostAUD = Table.AddColumn(CreateNetSaleUSD, "NetCostAUD", each Number.Round(
+    [CostValue] / [AUDFx], 
+    2
+  )),
+  CreateNetCostEUR = Table.AddColumn(CreateNetCostAUD, "NetCostEUR", each Number.Round(
+    [CostValue] / [EURFx], 
+    2
+  )),
+  CreateNetCostUSD = Table.AddColumn(CreateNetCostEUR, "NetCostUSD", each Number.Round(
+    [CostValue] / [USDFx], 
+    2
+  )),
+  ChangedType = Table.TransformColumnTypes(CreateNetCostUSD, {
+    {"NetSaleAUD", type number}, 
+    {"NetSaleEUR", type number}, 
+    {"NetSaleUSD", type number}, 
+    {"NetCostAUD", type number}, 
+    {"NetCostEUR", type number}, 
+    {"NetCostUSD", type number}, 
+    {"GlYear", type number}
+  }),
+  // Clean tables of redundant Columns
+  FinalSalesDetails = Table.RemoveColumns(ChangedType, {
+    "PostCurrency", 
+    "PostConvRate", 
+    "AUDFx", 
+    "EURFx", 
+    "USDFx"
+  })
+in
+  FinalSalesDetails
+
+---30
+
+let
+    Source = Excel.Workbook(File.Contents("H:\Produkte\PowerBI_Training\Datenquellen\Datumstabelle_mit_445_Periode.xlsx"), null, true),
+    Sheet = Source{[Item="Kalender",Kind="Sheet"]}[Data],
+    #"Promoted Headers" = Table.PromoteHeaders(Sheet),
+    #"Renamed Columns" = Table.RenameColumns(#"Promoted Headers", {{"DateKey", "DateKey"}, {"Year", "Year"}, {"Quarter", "Quarter"}, {"QuarterAndYear", "QuarterAndYear"}, {"Quartername", "Quartername"}, {"Month", "Month"}, {"MonthAndYear", "MonthAndYear"}, {"MonthName", "MonthName"}, {"MonthNameAndYear", "MonthNameAndYear"}, {"DayOfYear", "DayOfYear"}, {"DayOfMonth", "DayOfMonth"}, {"Weekday", "Weekday"}, {"WeekdayName", "WeekdayName"}, {"WeekdayShortName", "WeekdayShortName"}, {"Periode 4-4-5", "Periode 4-4-5"}, {"Name Periode 4-4-5", "Name Periode 4-4-5"}}),
+    #"Changed Type" = Table.TransformColumnTypes(#"Renamed Columns", {{"DateKey", type datetime}, {"Year", Int64.Type}, {"Quarter", type number}, {"QuarterAndYear", type text}, {"Quartername", type text}, {"Month", type number}, {"MonthAndYear", type text}, {"MonthName", type text}, {"MonthNameAndYear", type text}, {"DayOfYear", type number}, {"DayOfMonth", type number}, {"Weekday", type number}, {"WeekdayName", type text}, {"WeekdayShortName", type text}, {"Periode 4-4-5", type number}, {"Name Periode 4-4-5", type text}}),
+    #"Gefilterte Zeilen" = Table.SelectRows(#"Changed Type", each [Year] >= 2011 and [Year] <= 2015),
+    #"Geänderter Typ" = Table.TransformColumnTypes(#"Gefilterte Zeilen",{{"Quarter", Int64.Type}})
+in
+    #"Geänderter Typ"
+
+---31
+
+let
+    Quelle = PostgreSQL.Database("localhost", "postgres"),
+    banken = Text.Split(GetParameter("SampleDev", "Bank_Select"), ","),
+    tables = Table.SelectRows(Quelle, ((t) => 
+                                t[Schema] = "ru_output" 
+                                and Text.EndsWith(t[Name], "_default_info_kde") 
+                                and List.Contains(banken, Text.TrimStart(Text.Range(t[Item],1,3),"0")))),
+    colNames = Table.ColumnNames(List.First(tables[Data])),
+    end = Date.EndOfMonth(DateTime.Date(GetParameter("SampleDev", "AnalysisKeydate"))),
+    start = Date.EndOfMonth(Date.AddMonths(end, -12-13)),
+    allPivotedColumnNames = List.Select(colNames, (x) => Text.StartsWith(x, "def_rd_20") or Text.StartsWith(x, "ausfall_20") or Text.StartsWith(x, "ezko_obligo_20")),
+    pivotedColumnNames = List.Select(allPivotedColumnNames, (cn) => 
+        (let 
+                    startOfMonthString = Text.PositionOf(cn, "_20") + 1,
+            colDate = Date.EndOfMonth(#date(Number.FromText(Text.Range(cn,startOfMonthString,4)),Number.FromText(Text.Range(cn,startOfMonthString+5)),1)),
+           isRelevant = colDate <= end and colDate > start
+         in isRelevant )),
+    relevantColumns = List.Combine({{"bank", "kundnr", "nacebran", "swrechtf", "kdsegbasel", "kundart", "filiale_n", "ru_nummer_auto", "ru_name", "ist_prio_ru_kundnr", "kundenkeys_ru", "rat_segment_ru_agg", "rat_segment_kd_agg", "seg_misch"}, pivotedColumnNames}),
+    relevantData = Table.ExpandTableColumn(tables, "Data", relevantColumns),
+    onlyUsedColumns = Table.SelectColumns(relevantData, relevantColumns),
+    combinedColumnData = List.Generate(
+                        () => [
+                             ausfallCols = List.Select(pivotedColumnNames, each Text.StartsWith(_, "ausfall")), 
+                             table = onlyUsedColumns,
+                             generatedCols = {},
+                             count = List.Count(List.Select(pivotedColumnNames, each Text.StartsWith(_, "ausfall")))
+                        ], 
+                        (cur) => cur[count] >= 0, 
+                        (cur) => let 
+                                    ausfallCol = List.First(cur[ausfallCols]),
+                                    curColMonth = Text.Replace(ausfallCol, "ausfall_", ""),
+                                    defrdCol = "def_rd_" & curColMonth,
+                                    ezkoCol= "ezko_obligo_" & curColMonth,
+                                    result = [  
+                                        ausfallCols = List.RemoveFirstN(cur[ausfallCols]),
+                                        count = cur[count] - 1, 
+                                        generatedCols = List.Combine({cur[generatedCols], { curColMonth }}),
+                                        table = let
+                                          added = Table.AddColumn(
+                                            cur[table], 
+                                            curColMonth,
+                                            (row) => Number.ToText(Record.Field(row, ausfallCol)) & "++" 
+                                                        & Number.ToText(Record.Field(row, defrdCol)) & "++" 
+                                                        & Record.Field(row, ezkoCol) ),
+                                          removed = Table.RemoveColumns(added, { ausfallCol, defrdCol, ezkoCol })
+                                        in removed ]
+                                 in result),
+    combinedColumnsTable = List.Last(combinedColumnData)[table],
+    combinedPivotedColumns = List.Last(combinedColumnData)[generatedCols],
+    unpivoted = Table.Unpivot(combinedColumnsTable, combinedPivotedColumns, "Monat", "PivotValue"),
+    dividedCol = Table.SplitColumn(unpivoted, "PivotValue", Splitter.SplitTextByEachDelimiter({"++","++"}, QuoteStyle.Csv, false), {"ausfall", "IsDefault", "ezko_obligo"}),
+    mitStichtag = Table.AddColumn(dividedCol, "Stichtag", each Date.EndOfMonth(#date(Number.FromText(Text.Range([Monat],0,4)),Number.FromText(Text.Range([Monat],5)),1))),
+    removedColumns = Table.RemoveColumns(mitStichtag, { "Monat"}),
+    changedTypes = Table.TransformColumnTypes(removedColumns, {{"IsDefault", type number}, {"ausfall", type number}, {"ezko_obligo", type number}}),
+    defaultFilter = Table.SelectRows(changedTypes, each [IsDefault] = 0 or [IsDefault] = 1)
+in
+defaultFilter
+
+---32
+
+each (try _[Func] otherwise 422222222222222222222222222222222222222222222222222222222222222222222222222222)[HasError]=false
+
+---33
+
+let
+Quelle = DateTime.FixedLocalNow(),
+#"Result" = #table(
+   type table[
+       #"Update TS" = datetime,
+       #"Update Date"=date,
+       #"Update Time"=time,
+       #"Test"=time
+   ],
+   {
+        {Quelle, DateTime.Date(Quelle), DateTime.Time(Quelle)}
+   }
+)
+in
+#"Result"
+
+---34
+
+let
+Quelle = Table.FromRows(
+  Json.Document(Binary.Decompress(Binary.FromText(
+    "bdJbCoQwDIXhrQw+D5Kc2ttsRdz/NsbaPJyagC+mfBB+cp4bRMv23VB3Sfv4+Qh+Ivd3T5PsKq/p9X1QHagYqozQDVWH2njOhtqCmqHmUB+LqKG+oGqovxFskQdBFpQn4qkhnYtMpEsINaQOgeoBUT2eGkpUDymqx1NDB4XAEYXgqaE8F5koL6gYyg4VrlfCeu4iULleDeu5i0DjEC0M4S4Cnc4IPTojuItIQvWSRPV4el1/", 
+    BinaryEncoding.Base64
+  ), Compression.Deflate)), 
+  let
+      _t = ((type text) meta [Serialized.Text = true])
+    in
+      type table[Jahr = _t, StartSommerzeit = _t, StartWinterzeit = _t]
+),
+#"Geänderter Typ" = Table.TransformColumnTypes(Quelle, {{"Jahr", Int64.Type}, {
+  "StartSommerzeit", 
+  type datetime
+}, {
+  "StartWinterzeit", 
+  type datetime
+}})
+in
+#"Geänderter Typ"
+
+---35
+
+(#"Input Value" as text, Like as logical) as any =>
+let
+Values = {
+{"Aus","Australia"},
+{"Palestin", "Palestine"},
+{"Macao", "Macau"},
+{"Congo","Republic of the Congo"},
+{"Taiwan", "Taiwan"},
+{"Verde","Cabo Verde"},
+{"Hong Kong","Hong Kong"},
+{"Iran","Iran"},
+{"China","China"},
+{"Moldova","Moldova"},
+{"Bahamas","Bahamas"},
+{"Gambia","Gambia"},
+{"UK","United Kingdom"},
+{"US","United States"},
+{"Viet Nam","Vietnam"},
+{"South","South Korea"}, //asd
+{"Czech","Czech Republic"},
+{"Ship", null}, /* test */
+{"Princess", null}, //test
+{"The", null}
+},
+//test
+SWITCH = List.First(
+List.Select( /* test */
+Values,
+each if Like
+then Text.Contains(#"Input Value", _{0}, Comparer.OrdinalIgnoreCase)
+else _{0} = #"Input Value"
+)
+){1}?,
+Result = if SWITCH = null then #"Input Value" else SWITCH
+in
+Result
+
+---36
+
+let
+    Fonte = {Lines.FromBinary(Web.Contents("https://www.camara.leg.br/deputados/quem-sao/resultado?pagina=1"), null, null, 65001)},
+    Fonte1 = Fonte{0},
+    #"Convertido para Tabela" = Table.FromList(Fonte1, Splitter.SplitByNothing(), {"pagina"}, null, ExtraValues.Error),
+    #"Linhas Filtradas" = Table.SelectRows(#"Convertido para Tabela", each Text.Contains([pagina], "Exibindo resultados de")),
+    #"Extrair Numero de itens" = Table.TransformColumns(#"Linhas Filtradas", {{"pagina", each Text.BetweenDelimiters(_, "5 de ", " encontrados"), type text}}),
+    #"Gera Lista de Paginas" = Table.TransformColumns(#"Extrair Numero de itens",{{"pagina", each {1..(Number.RoundUp(Value.FromText( _ )/25, 0))}, type text}}),
+    Paginas = Table.FromList(#"Gera Lista de Paginas"{0}[pagina], Splitter.SplitByNothing(), {"pagina"}, null, ExtraValues.Error),
+    #"Tipo Alterado" = Table.TransformColumnTypes(Paginas,{{"pagina", type text}}),
+    #"Dados da Camara" = Table.AddColumn(#"Tipo Alterado", "Personalizar", each Lines.FromBinary(Web.Contents("https://www.camara.leg.br/deputados/quem-sao/resultado",[Query=[pagina=[pagina]]]), null, null, 65001)),
+    #"Mostra a Pagina" = Table.ExpandListColumn(#"Dados da Camara", "Personalizar"),
+    Deputados = Table.AddColumn(#"Mostra a Pagina", "deputado", each if Text.Contains([Personalizar], " <a href=""https://www.camara.leg.br/deputados/") then [Personalizar] else null),
+    Fotos = Table.AddColumn(Deputados, "Fotos", each if Text.Contains([Personalizar], "https://www.camara.leg.br/internet/deputado/bandep/") then [Personalizar] else null),
+    Status = Table.AddColumn(Fotos, "Status", each if Text.Contains([Personalizar], "lista-resultados__info-exercicio atuando") then [Personalizar] else null),
+    #"Preenchido Abaixo" = Table.FillDown(Status,{"deputado", "Fotos", "Status"}),
+    #"Colunas Removidas" = Table.RemoveColumns(#"Preenchido Abaixo",{"pagina", "Personalizar"}),
+    #"Linhas Filtradas1" = Table.SelectRows(#"Colunas Removidas", each [deputado] <> null and [deputado] <> ""),
+    #"Linhas Filtradas2" = Table.SelectRows(#"Linhas Filtradas1", each [Fotos] <> null and [Fotos] <> ""),
+    #"Duplicatas Removidas" = Table.Distinct(#"Linhas Filtradas2"),
+    TiraLixo = Table.SelectRows(#"Duplicatas Removidas", each ([deputado] <> "                            <a href=""https://www.camara.leg.br/deputados/quem-sao"">")),
+    #"Texto Extraído Entre os Delimitadores1" = Table.TransformColumns(TiraLixo, {{"deputado", each Text.BetweenDelimiters(_, "deputados/", "</a>"), type text}}),
+    FotosLink = Table.TransformColumns(#"Texto Extraído Entre os Delimitadores1", {{"Fotos", each Text.BetweenDelimiters(_, """", """"), type text}}),
+    StatusAtual = Table.TransformColumns(FotosLink, {{"Status", each Text.BetweenDelimiters(_, ">", "<"), type text}}),
+    #"Id e Deputado" = Table.SplitColumn(StatusAtual, "deputado", Splitter.SplitTextByEachDelimiter({""">"}, QuoteStyle.None, false), {"ID", "Deputado"}),
+    #"Duplicatas Removidas1" = Table.Distinct(#"Id e Deputado", {"ID"})
+in
+    #"Duplicatas Removidas1"
+
+---37
+
+let //halloe
+  c = type [ k = number, h= number,i= number,j= number,k= number /* aaaaaaaaaaaaaaaaaaaaaaaaaaasd */, ...], //test
+  d = type [...],
+  k = 1 //test comment
+in
+  k
+
+---38
+
+let 
+  //halloe
+  d = type [ k = number /* asd */, ...] ,
+  k = 1 //test comment
+in
+  k
+
+---39
+
+let
+  MyFunc = (netValue as number /*test*/) => 
+    let /* asd */
+//tests
+      MwSt = 0.19, //tests
+/* testing */
+      valueAfterTax /* a */ = netValue * (1 + MwSt) //testasdaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    in //tst
+//iss
+/*asd*/
+//asd
+
+
+//asd
+      valueAfterTax
+in
+//test
+  MyFunc
+//test
+
+---40
+
+let k = Table.SelectRows(#"Merged Queries", each [Attributes]?[Hidden]? <> true)
+in k
+
+---41
+
+section Section1; 
+A = "Hello";
+
+---42
+
+/* Capitalize each word in the Item column in the Orders table. Text.Proper  
+is evaluated for each Item in each table row. */  
+let  
+    Orders = Table.FromRecords({  
+        [OrderID = 1, CustomerID = 1, Item = "fishing rod", Price = 100.0],  
+          [OrderID = 2, CustomerID = 1, Item = "1 lb. worms", Price = 5.0],  
+          [OrderID = 3, CustomerID = 2, Item = "fishing net", Price = 25.0]}),  
+        #"Capitalized Each Word" = Table.TransformColumns(Orders, {"Item", Text.Proper})  
+in  
+        #"Capitalized Each Word"
+
+---43
+
+// Comment prior to let statement
+let
+  Source = ""
+in
+  Source
+
+---44
+
+let
+    Источник = Csv.Document(Web.Contents("https://www.liveinternet.ru/stat/ru/searches.csv?slice=mobile&id=4&id=13&id=5&id=total&period=month&graph=csv"),[Delimiter=";", Columns=5, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+    #"Повышенные заголовки" = Table.PromoteHeaders(Источник, [PromoteAllScalars=true]),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Повышенные заголовки",{{"Дата", type date}, {"Google", Int64.Type}, {"Яндекс", Int64.Type}, {"Search.Mail.ru", Int64.Type}, {"всего", Int64.Type}})
+in
+    #"Измененный тип"
+    
+---45
+
+// Function exp_by_squaring(x, n)
+//     if n < 0  then return exp_by_squaring(1 / x, -n);
+//     else if n = 0  then return  1;
+//     else if n = 1  then return  x ;
+//     else if n is even  then return exp_by_squaring(x * x,  n / 2);
+//     else if n is odd  then return x * exp_by_squaring(x * x, (n - 1) / 2);
+let
+    isEven = (x as number) => Number.Mod(x, 2) = 0,
+    k = if p = 0 then 1 else 0,
+    pow =
+        (x as number, p as number) =>
+            if p = 0 then
+                1
+            else if p < 0 then
+                error "negative power not supported"
+            else
+                x * @pow(x, p - 1),
+    fastPow =
+        (x as number, p as number) =>
+            if p = 0 then
+                1
+            else if p < 0 then
+                error "negative power not supported"
+            else if isEven(p) then
+                @fastPow(x * x, p / 2)
+            else
+                x * @fastPow(x * x, (p - 1) / 2)
+in
+    fastPow(2, 8)
+// Function exp_by_squaring(x, n)
+//     if n < 0  then return exp_by_squaring(1 / x, -n);
+//     else if n = 0  then return  1;
+//     else if n = 1  then return  x ;
+//     else if n is even  then return exp_by_squaring(x * x,  n / 2);
+//     else if n is odd  then return x * exp_by_squaring(x * x, (n - 1) / 2);
+
+---46
+
+let 
+ValueToText = (value, optional depth) =>
+    let
+        _canBeIdentifier = (x) =>
+                                        let
+                                            keywords = {"and", "as", "each", "else", "error", "false", "if", "in", "is", "let", "meta", "not", "otherwise", "or", "section", "shared", "then", "true", "try", "type" },
+                                            charAlpha = (c as number) => (c>= 65 and c <= 90) or (c>= 97 and c <= 122) or c=95,
+                                            charDigit = (c as number) => c>= 48 and c <= 57
+                                        in
+                                            try
+                                                charAlpha(Character.ToNumber(Text.At(x,0))) 
+                                                and
+                                                    List.MatchesAll(
+                                                        Text.ToList(x),
+                                                        (c)=> let num = Character.ToNumber(c) in charAlpha(num) or charDigit(num)
+                                                    )
+                                                and not 
+                                                    List.MatchesAny( keywords, (li)=> li=x )
+                                            otherwise 
+                                                false,
+    
+        Serialize.Binary =      (x) => "#binary(" & Serialize(Binary.ToList(x)) & ") ",
+
+        Serialize.Date =        (x) => "#date(" & 
+                                       Text.From(Date.Year(x))  & ", " & 
+                                       Text.From(Date.Month(x)) & ", " & 
+                                       Text.From(Date.Day(x))   & ") ",
+
+        Serialize.Datetime =    (x) => "#datetime(" &
+                                       Text.From(Date.Year(DateTime.Date(x)))    & ", " &
+                                       Text.From(Date.Month(DateTime.Date(x)))   & ", " &
+                                       Text.From(Date.Day(DateTime.Date(x)))     & ", " &
+                                       Text.From(Time.Hour(DateTime.Time(x)))    & ", " &
+                                       Text.From(Time.Minute(DateTime.Time(x)))  & ", " &
+                                       Text.From(Time.Second(DateTime.Time(x)))  & ") ",
+
+        Serialize.Datetimezone =(x) => let 
+                                          dtz = DateTimeZone.ToRecord(x) 
+                                       in
+                                          "#datetimezone(" & 
+                                          Text.From(dtz[Year])        & ", " &
+                                          Text.From(dtz[Month])       & ", " &
+                                          Text.From(dtz[Day])         & ", " &
+                                          Text.From(dtz[Hour])        & ", " &
+                                          Text.From(dtz[Minute])      & ", " &
+                                          Text.From(dtz[Second])      & ", " &
+                                          Text.From(dtz[ZoneHours])   & ", " &
+                                          Text.From(dtz[ZoneMinutes]) & ") ",
+
+        Serialize.Duration =    (x) => let
+                                          dur = Duration.ToRecord(x)
+                                       in
+                                          "#duration(" &
+                                          Text.From(dur[Days])    & ", " &
+                                          Text.From(dur[Hours])   & ", " &
+                                          Text.From(dur[Minutes]) & ", " &
+                                          Text.From(dur[Seconds]) & ") ",
+
+        Serialize.Function =    (x) => _serialize_function_param_type(
+                                          Type.FunctionParameters(Value.Type(x)),
+                                          Type.FunctionRequiredParameters(Value.Type(x)) ) &
+                                       " as " &
+                                       _serialize_function_return_type(Value.Type(x)) &
+                                       " => (...) ",
+
+        Serialize.List =        (x) => "{" & 
+                                       List.Accumulate(x, "", (seed,item) => if seed="" then Serialize(item) else seed & ", " & Serialize(item)) &
+                                       "} ",
+
+        Serialize.Logical =     (x) => Text.From(x),
+
+        Serialize.Null =        (x) => "null",
+
+        Serialize.Number =      (x) => 
+                                    let Text.From = (i as number) as text => 
+                                        if Number.IsNaN(i) then "#nan" else
+                                        if i=Number.PositiveInfinity then "#infinity" else
+                                        if i=Number.NegativeInfinity then "-#infinity" else
+                                        Text.From(i)
+                                    in
+                                        Text.From(x),
+
+        Serialize.Record =      (x) => "[ " &
+                                       List.Accumulate(
+                                            Record.FieldNames(x), 
+                                            "", 
+                                            (seed,item) => 
+                                                (if seed="" then Serialize.Identifier(item) else seed & ", " & Serialize.Identifier(item)) & " = " & Serialize(Record.Field(x, item))
+                                       ) &
+                                       " ] ",
+
+        Serialize.Table =       (x) => "#table( type " &
+                                        _serialize_table_type(Value.Type(x)) &
+                                        ", " &
+                                        Serialize(Table.ToRows(x)) &
+                                        ") ",
+                                    
+        Serialize.Text =        (x) => """" & 
+                                       _serialize_text_content(x) & 
+                                       """",
+
+        _serialize_text_content =  (x) => let 
+                                            escapeText = (n as number) as text => "#(#)(" & Text.PadStart(Number.ToText(n, "X", "en-US"), 4, "0") & ")"
+                                        in
+                                        List.Accumulate(
+                                           List.Transform(
+                                               Text.ToList(x),
+                                               (c) => let n=Character.ToNumber(c) in 
+                                                        if n = 9   then "#(#)(tab)" else
+                                                        if n = 10  then "#(#)(lf)"  else
+                                                        if n = 13  then "#(#)(cr)"  else
+                                                        if n = 34  then """"""      else
+                                                        if n = 35  then "#(#)(#)"   else
+                                                        if n < 32  then escapeText(n) else 
+                                                        if n < 127 then Character.FromNumber(n) else 
+                                                        escapeText(n) 
+                                            ),
+                                            "",
+                                            (s,i)=>s&i
+                                        ),
+        
+        Serialize.Identifier =   (x) => 
+                                        if _canBeIdentifier(x) then 
+                                            x 
+                                        else 
+                                            "#""" &
+                                            _serialize_text_content(x) &
+                                            """",
+
+        Serialize.Time =        (x) => "#time(" &
+                                       Text.From(Time.Hour(x))   & ", " & 
+                                       Text.From(Time.Minute(x)) & ", " & 
+                                       Text.From(Time.Second(x)) & ") ",
+                                
+        Serialize.Type =        (x) => "type " & _serialize_typename(x),
+                                    
+                             
+        _serialize_typename =    (x, optional funtype as logical) =>                        /* Optional parameter: Is this being used as part of a function signature? */
+                                    let
+                                        isFunctionType = (x as type) => try if Type.FunctionReturn(x) is type then true else false otherwise false,
+                                        isTableType = (x as type) =>  try if Type.TableSchema(x) is table then true else false otherwise false,
+                                        isRecordType = (x as type) => try if Type.ClosedRecord(x) is type then true else false otherwise false,
+                                        isListType = (x as type) => try if Type.ListItem(x) is type then true else false otherwise false
+                                    in
+                                
+                                        if funtype=null and isTableType(x) then _serialize_table_type(x) else
+                                        if funtype=null and isListType(x) then "{ " & @_serialize_typename( Type.ListItem(x) ) & " }" else
+                                        if funtype=null and isFunctionType(x) then "function " & _serialize_function_type(x) else
+                                        if funtype=null and isRecordType(x) then _serialize_record_type(x) else
+                                    
+                                        if x = type any then "any" else
+                                        let base = Type.NonNullable(x) in
+                                          (if Type.IsNullable(x) then "nullable " else "") &       
+                                          (if base = type anynonnull then "anynonnull" else                
+                                          if base = type binary then "binary" else                
+                                          if base = type date   then "date"   else
+                                          if base = type datetime then "datetime" else
+                                          if base = type datetimezone then "datetimezone" else
+                                          if base = type duration then "duration" else
+                                          if base = type logical then "logical" else
+                                          if base = type none then "none" else
+                                          if base = type null then "null" else
+                                          if base = type number then "number" else
+                                          if base = type text then "text" else 
+                                          if base = type time then "time" else 
+                                          if base = type type then "type" 
+                                          /* Abstract types: */
+                                          else 
+                                          if base = type function then "function" else
+                                          if base = type table then "table" else
+                                          if base = type record then "record" else
+                                          if base = type list then "list" else
+                                      
+                                          "any /*Actually unknown type*/"),
+
+        _serialize_table_type =     (x) => 
+                                           let 
+                                             schema = Type.TableSchema(x)
+                                           in
+                                             "table " &
+                                             (if Table.IsEmpty(schema) then "" else 
+                                                 "[" & List.Accumulate(
+                                                    List.Transform(
+                                                        Table.ToRecords(Table.Sort(schema,"Position")),
+                                                        each Serialize.Identifier(_[Name]) & " = " & _[Kind]),
+                                                    "",
+                                                    (seed,item) => (if seed="" then item else seed & ", " & item )
+                                                ) & "] " ),
+
+        _serialize_record_type =    (x) => 
+                                            let flds = Type.RecordFields(x)
+                                            in
+                                                if Record.FieldCount(flds)=0 then "record" else
+                                                    "[" & List.Accumulate(
+                                                        Record.FieldNames(flds),
+                                                        "",
+                                                        (seed,item) => 
+                                                            seed &
+                                                            (if seed<>"" then ", " else "") &
+                                                            (Serialize.Identifier(item) & "=" & _serialize_typename(Record.Field(flds,item)[Type]) )
+                                                    ) & 
+                                                    (if Type.IsOpenRecord(x) then ",..." else "") &
+                                                    "]",
+
+        _serialize_function_type =  (x) => _serialize_function_param_type(
+                                              Type.FunctionParameters(x),
+                                              Type.FunctionRequiredParameters(x) ) &
+                                            " as " &
+                                            _serialize_function_return_type(x),
+    
+        _serialize_function_param_type = (t,n) => 
+                                let
+                                    funsig = Table.ToRecords(
+                                        Table.TransformColumns(
+                                            Table.AddIndexColumn( Record.ToTable( t ), "isOptional", 1 ),
+                                            { "isOptional", (x)=> x>n } ) )
+                                in
+                                    "(" & 
+                                    List.Accumulate(
+                                        funsig,
+                                        "",
+                                        (seed,item)=>
+                                            (if seed="" then "" else seed & ", ") &
+                                            (if item[isOptional] then "optional " else "") &
+                                            Serialize.Identifier(item[Name]) & " as " & _serialize_typename(item[Value], true) )
+                                     & ")",
+
+        _serialize_function_return_type = (x) => _serialize_typename(Type.FunctionReturn(x), true), 
+
+        Serialize = (x) as text => 
+                           if x is binary       then try Serialize.Binary(x) otherwise "null /*serialize failed*/"        else 
+                           if x is date         then try Serialize.Date(x) otherwise "null /*serialize failed*/"          else 
+                           if x is datetime     then try Serialize.Datetime(x) otherwise "null /*serialize failed*/"      else 
+                           if x is datetimezone then try Serialize.Datetimezone(x) otherwise "null /*serialize failed*/"  else 
+                           if x is duration     then try Serialize.Duration(x) otherwise "null /*serialize failed*/"      else 
+                           if x is function     then try Serialize.Function(x) otherwise "null /*serialize failed*/"      else 
+                           if x is list         then try Serialize.List(x) otherwise "null /*serialize failed*/"          else 
+                           if x is logical      then try Serialize.Logical(x) otherwise "null /*serialize failed*/"       else
+                           if x is null         then try Serialize.Null(x) otherwise "null /*serialize failed*/"          else
+                           if x is number       then try Serialize.Number(x) otherwise "null /*serialize failed*/"        else
+                           if x is record       then try Serialize.Record(x) otherwise "null /*serialize failed*/"        else 
+                           if x is table        then try Serialize.Table(x) otherwise "null /*serialize failed*/"         else 
+                           if x is text         then try Serialize.Text(x) otherwise "null /*serialize failed*/"          else 
+                           if x is time         then try Serialize.Time(x) otherwise "null /*serialize failed*/"          else 
+                           if x is type         then try Serialize.Type(x) otherwise "null /*serialize failed*/"          else 
+                           "[#_unable_to_serialize_#]"                     
+    in
+        try Serialize(value) otherwise "<serialization failed>"
+in
+    ValueToText("Some value")
+
+
+---47
+
+let 
+  k = "asd1" & "asd2" & "asd3" & "asd4" & "asd5" & "asd6" & "asd7" & "asd8" & "asd9" & "asd10" & "asd11" & "asd12" & "asd13" & "asd14" & "asd15" & "asd16" & "asd17" & "asd18" & "asd19" & "asd20" & "asd21" & "asd22" & "asd23" & "asd24" & "asd25" ,
+   Serialize.Record = (x) => "[ "
+         & List.Accumulate(
+          Record.FieldNames(x), 
+          "", 
+          (seed, item) => (
+            if seed
+               = "" then 
+              Serialize.Identifier(item)
+            else 
+              seed
+                 & ", "
+                 & Serialize.Identifier(item))
+             & " = "
+             & Serialize(Record.Field(x, item))
+        )
+         & " ] "
+in 
+  k
+
+
+---48
+
+let
+    Documentation = type function(
+        tag as (type nullable text meta [
+            Documentation.FieldCaption = "Tag to Format",
+            Documentation.SampleValues = {"wh2_dlc09_title_king"}
+        ])
+    ) as nullable text meta [
+        Documentation.Name = "GQ_FormatTagForTitling",
+        Documentation.LongDescription = "Transforms a_database_tag into a Pretty Title. " &
+        "Will replace underscores with spaces, and then apply Title Casing to every word. ",
+        Documentation.Examples = {[
+            Description = "Formats a tag.",
+            Code = "GQ_FormatTagForTitling(""wh2_dlc09_title_king"")",
+            Result = """Wh2 Dlc09 Title King"""
+        ],[
+            Description = "Tags in ALL_CAPS will get Title Cased.",
+            Code = "GQ_FormatTagForTitling(""EMPTY_EFFECT"")",
+            Result = """Empty Effect"""
+        ]}
+    ],
+    FormatTagForTitling = (
+        tag as nullable text
+    ) as nullable text => 
+    if tag is null then tag else
+    let
+        ReplacedUnderscores = Text.Replace(tag, "_", " "),
+        Capitalized = Text.Proper(ReplacedUnderscores),
+
+        Returned = Capitalized
+    in
+        Returned,
+
+    DocumentedCall = Value.ReplaceType(FormatTagForTitling, Documentation)
+in
+    DocumentedCall
+    
+  
+---49
+
+let
+    FormatTagForTitling = (
+        tag as nullable text
+    ) as nullable text => 
+    if tag is null then tag else
+    let
+        ReplacedUnderscores = Text.Replace(tag, "_", " "),
+        Capitalized = Text.Proper(ReplacedUnderscores),
+
+        Returned = Capitalized
+    in
+        Returned,
+
+    DocumentedCall = FormatTagForTitling
+in
+    DocumentedCall
+    
+    
+---50
+
+let
+    Source = "Start the description with an action verb and a 1-sentence description of what the function does. " &
+            "<p>" &
+            "Some HTML tags can be used. <br>Notably, these work: " &
+            "<ul>" &
+            "<li> <b>bold</b>" &
+            "<li> <i>italics</i>" &
+            "<li> <code>code</code>" &
+            "</ul>" &
+            "These do not work:" &
+            "<ul>" &
+            "<li> " &
+                "<dl>" &
+                "    <dt>Definition List</dt>" &
+                "    <dd>A list of terms to define.</dd>" &
+                "" &
+                "    <dt>Definition Term</dt>" &
+                "    <dd>Definition Definition.</dd>" &
+                "</dl>" &
+            "<li> <u>underlined</u>" &
+            "<li> <strong>strong</strong>" &
+            "<li> <em>emphasis</em>" &
+            "<li> <mark>mark</mark>" &
+            "<li> <small>small</small>" &
+            "<li> <del>deleted</del>" &
+            "<li> <ins>inserted</ins>" &
+            "<li> <sub>subscript</sub>" &
+            "<li> <sup>superscript</sup>" &
+            "</ul>" &
+            "<ol> <li>Ordered list</li></ol>" &
+            "<br>" &
+            "<h1>Headings</h1>" &
+            "<br>" &
+            "<hr>Horizontal rule</hr>" &
+            "<br>" &
+            "<q>Short quote</q>" &
+            "<br>" &
+            "<blockquote cite=""https://www.google.com"">Blockquote</blockquote>" &
+            "<p>" &
+            "Tables work, but not their headers:" &
+            "<table>" &
+            "  <tr>" &
+            "    <th>Game</th>" &
+            "    <th>Year of Release</th>" &
+            "  </tr>" &
+            "  <tr>" &
+            "    <td>Three Kingdoms</td>" &
+            "    <td>2019</td>" &
+            "  </tr>" &
+            "  <tr>" &
+            "    <td>Thrones of Britannia</td>" &
+            "    <td>2019</td>" &
+            "  </tr>" &
+            "</table>" &
+            "<p>" &
+            "Neither do tbody and thead:" &
+            "<table>" &
+            " <thead>" &
+            "  <tr>" &
+            "    <th>Game</th>" &
+            "    <th>Year of Release</th>" &
+            "  </tr>" &
+            " </thead>" &
+            " <tbody>" &
+            "  <tr>" &
+            "    <td>Three Kingdoms</td>" &
+            "    <td>2019</td>" &
+            "  </tr>" &
+            "  <tr>" &
+            "    <td>Thrones of Britannia</td>" &
+            "    <td>2019</td>" &
+            "  </tr>" &
+            " </tbody>" &
+            "</table>"
+in
+    Source
+    
+
+---51
+
+let
+  Result = 
+"[Key]                       [Name]      [Differentiated]
+wh2_main_lothern            Lothern     Lothern
+wh2_dlc09_tomb_kings        Tomb Kings  Tomb Kings
+wh2_dlc09_tomb_kings_qb1    Tomb Kings  Tomb Kings (Qb1)
+wh2_dlc09_tomb_kings_qb2    Tomb Kings  Tomb Kings (Qb2)"
+in
+  Result
+  
+  
+---52
+
+section HelloWorld;
+ 
+[DataSource.Kind="HelloWorld", Publish="HelloWorld.Publish"]
+shared HelloWorld.Contents = (optional message as text) =>
+    let
+        message = if (message <> null) then message else "Hello world"
+    in
+        message;
+ 
+HelloWorld = [
+    Authentication = [
+        Implicit = []
+    ],
+    Label = Extension.LoadString("DataSourceLabel")
+];
+ 
+HelloWorld.Publish = [
+    Beta = true,
+    ButtonText = { Extension.LoadString("FormulaTitle"), Extension.LoadString("FormulaHelp") },
+    SourceImage = HelloWorld.Icons,
+    SourceTypeImage = HelloWorld.Icons
+];
+ 
+HelloWorld.Icons = [
+    Icon16 = { Extension.Contents("HelloWorld16.png"), Extension.Contents("HelloWorld20.png"), Extension.Contents("HelloWorld24.png"), Extension.Contents("HelloWorld32.png") },
+    Icon32 = { Extension.Contents("HelloWorld32.png"), Extension.Contents("HelloWorld40.png"), Extension.Contents("HelloWorld48.png"), Extension.Contents("HelloWorld64.png") }
+];
+
+---53
+
+let k = null ?? 10 in k
