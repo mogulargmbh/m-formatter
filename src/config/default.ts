@@ -77,12 +77,7 @@ let defaultCss = `
 .literal {
   color: #dcdcaa;
 }
-
-body {
-  font-family: monospace;
-  background-color: #1e1e1e;
-}`
-
+`
 export const defaultFormatterConfig: IFormatterConfig = {
   indentationLength: 2,
   lineWidth: 100,

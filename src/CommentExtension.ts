@@ -6,7 +6,6 @@ type ICommentExtensionBase = {
   trailingNewLine: boolean,
   leadingNewLine: boolean,
   range: Range,
-  text: string
   initialize: (node: ExtendedNode, sourceCode: string) => void;
   format: (state: IFormatState, config: IFormatterConfig, suppressLeadingLineBreak?: boolean) => [FormatResult, IFormatState];
   updateTokenRange: () => void;
@@ -24,11 +23,20 @@ export function extendComment(comment: TComment, node: ExtendedNode, code: strin
   return res;
 }
 
+function getPreviousNode(node: ExtendedNode): ExtendedNode
+{
+  if(node.parent)
+  {
+    let idx = node.parent.children.indexOf(node);
+    return node.parent.children[idx - 1] ?? node.parent;
+  }
+  return null;
+}
+
 const CommentExtensionBase: ICommentExtensionBase = {
   leadingNewLine: false,
   trailingNewLine: false,
   range: null,
-  text: null,
   initialize: function(this: ExtendedComment, node: ExtendedNode, sourceCode: string) {
     this.range = {
       start: null,
@@ -36,16 +44,8 @@ const CommentExtensionBase: ICommentExtensionBase = {
     }
     this.trailingNewLine = this.positionStart.lineNumber != node.tokenRange.positionStart.lineNumber;
     
-    let lastNode: ExtendedNode = null
-    if(node.parent)
-    {
-      let idx = node.parent.children.indexOf(node);
-      lastNode = node.parent.children[idx - 1] ?? node.parent;
-    }
-    
-    this.leadingNewLine = lastNode && lastNode.tokenRange.positionStart.lineNumber != this.positionStart.lineNumber;
-    
-    this.text = sourceCode.substring(this.positionStart.codeUnit, this.positionEnd.codeUnit).trim().replace(/\n/g, "\n");
+    let lastNode: ExtendedNode = getPreviousNode(node);
+    this.leadingNewLine = lastNode && lastNode.tokenRange.positionEnd.lineNumber != this.positionStart.lineNumber;
   },
   updateTokenRange: function(this: ExtendedComment) {
     Object.assign(this.positionStart, {
@@ -73,7 +73,7 @@ const CommentExtensionBase: ICommentExtensionBase = {
         line,
         unit,
       }
-      unit += this.text.length;
+      unit += this.data.length;
       this.range.end = {
         line,
         unit
@@ -88,7 +88,7 @@ const CommentExtensionBase: ICommentExtensionBase = {
         unit
       }
       
-      unit += this.text.length;
+      unit += this.data.length;
       this.range.end = {
         line,
         unit: unit

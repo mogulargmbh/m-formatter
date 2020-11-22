@@ -755,7 +755,8 @@ in
 
 let //halloe
   c = type [ k = number, h= number,i= number,j= number,k= number /* aaaaaaaaaaaaaaaaaaaaaaaaaaasd */, ...], //test
-  d = type [...],
+  //asd2
+  d = type [...], //asd
   k = 1 //test comment
 in
   k

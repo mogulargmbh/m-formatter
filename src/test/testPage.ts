@@ -16,6 +16,10 @@ export function buildTestPage(results: [string|FormatError, number, string][]): 
       white-space: pre;
     }
     ${defaultHtmlSerializerConfig.inlineCss}
+    h3 {
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
     </style>
   </head>
 <body style="position: relative;" onload="load()">

@@ -20,7 +20,7 @@ export class TextAstSerializer extends BaseAstSerializer<WritableTokenPosition, 
     for(let c of n.leadingComments)
     {
       result += this.moveCursor(c.positionStart);
-      result += c.text;
+      result += c.data;
       result += this.moveCursor(c.positionEnd);
     }
     

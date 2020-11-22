@@ -59,8 +59,8 @@ export class HtmlAstSerializer extends BaseAstSerializer<{ bracket: number } & W
     {
       result += this.moveCursor(c.positionStart);
       result += `<span class="comment" ${this.config.debugMode == true ? ` _range="${this.printRange(c.range)}"` : ""}>`
-      result += c.text + "</span>";
-      this.state.lineCodeUnit += c.text.length;
+      result += c.data + "</span>";
+      this.state.lineCodeUnit += c.data.length;
       result += this.moveCursor(c.positionEnd);
     }
     

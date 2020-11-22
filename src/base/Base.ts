@@ -188,7 +188,8 @@ export const NodeExtensionBase: INodeExtensionBase =
     if(typeof this._children === "function")
       this.children = Array.from(this._children()).filter(c => c != null);
       
-    this.leadingComments = Array.from(this.takeLeadingComments(comments)).map(l => extendComment(l, this, sourceCode));
+    this.leadingComments = Array.from(this.takeLeadingComments(comments))
+      .map(l => extendComment(l, this, sourceCode));
   },
   takeLeadingComments: function*(this: ExtendedNode, comments: TComment[]): Generator<TComment> {
     for(let c of comments.slice())
@@ -213,7 +214,6 @@ export const NodeExtensionBase: INodeExtensionBase =
     this.wsAfter  = wsAfter ?? 0;
   },
   formatLeadingComments: function(this: IPrivateNodeExtension): FormatResult {
-    let resState: IFormatState = this.state;
     let i = 0;
     for(let c of this.leadingComments)
     {

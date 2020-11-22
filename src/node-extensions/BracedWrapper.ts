@@ -29,7 +29,8 @@ function _formatBroken(this: This): FormatResult
   let s = this.subState({
     line: this.state.line + 1,
     unit: this.nextIndentUnit(),
-    indent: this.state.indent + 1
+    indent: this.state.indent + 1,
+    suppressInitialLineBreak: true
   });
   
   this.content.format(s);

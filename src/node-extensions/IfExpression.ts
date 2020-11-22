@@ -86,7 +86,7 @@ function _formatBroken(this: This): FormatResult
       line: this.elseConstant.range.end.line + 1,
       indent: indent + 1,
       unit: this.indentUnit(indent + 1),
-      forceLineBreak: true,
+      suppressInitialLineBreak: true
     });
   }
   this.falseExpression.format(s);
