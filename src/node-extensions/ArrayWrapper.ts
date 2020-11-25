@@ -90,6 +90,7 @@ export const ArrayWrapperExtension: IPrivateNodeExtension<Optional<IArrayWrapper
     ...defaultOpts
   },
   _ext: "ArrayWrapper",
+  takesLeadingComments: false,
   ...BreakOnAnyChildBrokenNodeBase,
   _formatBroken,
   _formatInline,

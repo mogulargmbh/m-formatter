@@ -45,6 +45,7 @@ function _formatBroken(this: This): FormatResult
   
   this.expression.format(this.subState({
     line,
+    indent: indent + 1,
     unit: this.indentUnit(indent + 1)
   }));
   

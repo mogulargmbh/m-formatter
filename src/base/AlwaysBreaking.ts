@@ -4,7 +4,11 @@ import { FormatResult, IFormatState, PrivateExtendedNode, NodeExtensionBase, IBa
 export function format(this: PrivateExtendedNode, state: IFormatState, wsBefore: number = null, wsAfter: number = null, opts): FormatResult
 {
   this.initFormat(state, wsBefore, wsAfter, opts);
-  let res = this.formatLeadingComments();
+  this.setRangeStart(); 
+  
+  let [res, s] = this.formatLeadingComments();
+  this.state = s;
+
   if(res == FormatResult.Break && this.state.stopOnLineBreak)
     return FormatResult.Break;
   
@@ -12,11 +16,18 @@ export function format(this: PrivateExtendedNode, state: IFormatState, wsBefore:
     return FormatResult.Break;
   
   this.isBroken = true;
-  this.setRangeStart();
   
   res = this._formatBroken();
   
   this.setRangeEnd(this.children?.last() ?? this.state);
+  
+  if(this.trailingComments.any())
+  {
+    let [res2, s2] = this.formatTrailingComments();
+    this.setRangeEnd(s2);
+  }
+  
+  this.finishFormat();
   return FormatResult.Ok;
 }
 

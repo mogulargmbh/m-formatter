@@ -28,7 +28,7 @@ function _formatBroken(this: This)
   this.equalConstant.format(this.subState({
     unit: this.nextIndentUnit(),
     line: this.state.line + 1
-  }), 0, 1 );
+  }), 0, 1);
   
   this.value.format(this.subState(this.equalConstant.range.end)); //No need for notify break as this node is breaking hence when state.notifyBreak is true this._formatBroken would nevre be called!
   
@@ -45,6 +45,7 @@ function *_children(this: This)
 export const PairedExpressionExtension: IPrivateNodeExtension = {
   _ext: "PairedExpression",
   ...BreakOnLineEndNodeBase,
+  takesLeadingComments: false,
   _formatInline,
   _formatBroken,
   _children,

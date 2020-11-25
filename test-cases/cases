@@ -754,7 +754,7 @@ in
 ---37
 
 let //halloe
-  c = type [ k = number, h= number,i= number,j= number,k= number /* aaaaaaaaaaaaaaaaaaaaaaaaaaasd */, ...], //test
+  c = type [ k = number, h= number,i= number,j= number,k= number /* aaaaaaaaaaaaaaaaaaaaaaaaaaasd */, ...], /*asd*/ //test
   //asd2
   d = type [...], //asd
   k = 1 //test comment
@@ -778,7 +778,7 @@ let
 //tests
       MwSt = 0.19, //tests
 /* testing */
-      valueAfterTax /* a */ = netValue * (1 + MwSt) //testasdaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      valueAfterTax /* a */ = netValue * (1 + MwSt) //testasdaaaaaaaaaaaaaaaaaaaaaaa
     in //tst
 //iss
 /*asd*/
@@ -788,8 +788,8 @@ let
 //asd
       valueAfterTax
 in
-//test
-  MyFunc
+//123
+  MyFunc //asd
 //test
 
 ---40

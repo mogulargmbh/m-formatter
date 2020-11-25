@@ -8,6 +8,7 @@ import { assertnever } from '../Util';
 import { BaseAstSerializer } from './BaseAstSerializer';
 import { IHtmlSerializerConfig } from '../config/definitions';
 import { defaultHtmlSerializerConfig } from '../config/default';
+import { ExtendedComment } from '../CommentExtension';
 
 export type literalClass = "string" | "list" | "boolean" | "number" | "null" | "record";
 export type operatorConstantClass = "operator" | "operator-keyword" | "operator-arithmetic" | "operator-equality" | "operator-logical" | "operator-relational" | "operator-unary" | "operator-keyword";
@@ -52,27 +53,32 @@ export class HtmlAstSerializer extends BaseAstSerializer<{ bracket: number } & W
     return `${range.start.line}:${range.start.unit}-${range.end.line}:${range.end.unit}`
   }
   
+  visitComment(c: ExtendedComment): string
+  {
+    let result = "";
+    result += this.moveCursor(c.positionStart);
+    result += `<span class="comment" ${this.config.debugMode == true ? ` _range="${this.printRange(c.range)}" _commentKind="${c.commentKind}" _node_id="${c.node._id}"` : ""}>`
+    result += escapeHtml(c.data) + "</span>";
+    this.state.lineCodeUnit += c.data.length;
+    result += this.moveCursor(c.positionEnd);
+    return result;
+  }
+  
   visit(n: ExtendedNode): string
   {
-    let result = ""
+    let result = this.openSpan(n);
+    result += this.moveCursor(n.tokenRange.positionStart);
+    
     for(let c of n.leadingComments)
     {
-      result += this.moveCursor(c.positionStart);
-      result += `<span class="comment" ${this.config.debugMode == true ? ` _range="${this.printRange(c.range)}"` : ""}>`
-      result += c.data + "</span>";
-      this.state.lineCodeUnit += c.data.length;
-      result += this.moveCursor(c.positionEnd);
+      result += this.visitComment(c);
     }
-    
-    result += this.openSpan(n);
-    result += this.moveCursor(n.tokenRange.positionStart);
     
     if(n.isLeaf === true)
     {
-      result += this.spanContent(n);
-        
-      this.state.lineNumber = n.tokenRange.positionEnd.lineNumber;
-      this.state.lineCodeUnit = n.tokenRange.positionEnd.lineCodeUnit;
+      let content = n.getContentString();
+      result += this.spanContent(content);
+      this.state.lineCodeUnit += content.length;
     }
     else
     {
@@ -80,10 +86,14 @@ export class HtmlAstSerializer extends BaseAstSerializer<{ bracket: number } & W
       {
         result += this.visit(c); 
       }
-      
-      result += this.moveCursor(n.tokenRange.positionEnd);
     }
     
+    for(let c of n.trailingComments)
+    {
+      result += this.visitComment(c);
+    }
+    
+    result += this.moveCursor(n.tokenRange.positionEnd);
     result += this.closeSpan(n);
     
     return result;
@@ -140,9 +150,9 @@ export class HtmlAstSerializer extends BaseAstSerializer<{ bracket: number } & W
     return `</span>`
   }
   
-  spanContent(node: ExtendedNode): string
+  spanContent(content: string): string
   {
-    return escapeHtml(node.getContentString());
+    return escapeHtml(content);
   }
   
   getConstantTokenClass(constantKind: TConstantKind): tokenClass[]

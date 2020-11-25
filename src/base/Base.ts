@@ -48,6 +48,7 @@ export type OptionalFormatState = Optional<IFormatState>;
 export interface IPublicNodeExtension
 {
   respectsWhitespace?: boolean;
+  takesLeadingComments?: boolean,
   getContentString?(): string;
   _ext: string;
 }
@@ -59,6 +60,7 @@ export interface INodeExtensionBase
   leadingComments: ExtendedComment[];
   trailingComments: ExtendedComment[];
   parent: ExtendedNode;
+  prev: ExtendedNode;
   isBroken: boolean;
   state: IFormatState;
   wsBefore: number;
@@ -68,7 +70,7 @@ export interface INodeExtensionBase
   config: IFormatterConfig,
   _id: number;
   _formatCnt: number;
-  initialize: (sourceCode: string, parent: ExtendedNode, config: IFormatterConfig, comments: TComment[]) => void;
+  initialize: (parent: ExtendedNode, prev: ExtendedNode, config: IFormatterConfig, comments: TComment[]) => void;
   hasContentString: () => boolean;
   subState: (state?: OptionalFormatState) => IFormatState;
   nextIndentUnit: () => number;
@@ -82,8 +84,9 @@ export interface INodeExtensionBase
   updateTokenRange: () => void;
   lastChild: () => PublicExtendedNode;
   initFormat: (state: IFormatState, wsBefore: number, wsAfter: number, opts: any) => void;
-  takeLeadingComments: (comments: TComment[]) => Generator<TComment>;
-  formatLeadingComments: () => FormatResult;
+  finishFormat: () => void;
+  formatLeadingComments: () => [FormatResult, IFormatState];
+  formatTrailingComments: () => [FormatResult, IFormatState];
 }
 
 export interface IBaseNode<T = any> extends INodeExtensionBase
@@ -156,9 +159,23 @@ type MappedNode<T> = MapArrayExtendedNode<MapExtendedNode<T>>;
 export type PrivateNode<T extends Ast.INode = Ast.INode, TOpts = any> = MappedNode<T> & PrivateExtendedNode<T, TOpts>;
 export type ExtendedNode<T extends Ast.INode = Ast.INode, TOpts = any> = MappedNode<T> & PublicExtendedNode<T, TOpts>;
 
+function getLeadingComments(node: ExtendedNode, comments: TComment[]): ExtendedComment[]
+{
+  let res = [];
+  for(let c of comments.slice())
+  {
+    if(node.tokenRange.positionStart.codeUnit >= c.positionEnd.codeUnit)
+    {
+      res.push(comments.splice(comments.indexOf(c), 1)[0]);
+    }
+  }
+  return res;
+}
+
 export const NodeExtensionBase: INodeExtensionBase =
 {
   parent: null,
+  prev: null,
   state: null,
   isBroken: false,
   wsBefore: null,
@@ -170,11 +187,15 @@ export const NodeExtensionBase: INodeExtensionBase =
   trailingComments: null,
   _id: null,
   _formatCnt: 0,
-  initialize: function(this: PrivateExtendedNode, sourceCode: string, parent: ExtendedNode, config: IFormatterConfig, comments: TComment[]) {
-    this._id = NodeCounter;
+  initialize: function(this: PrivateExtendedNode, parent: ExtendedNode, prev: ExtendedNode, config: IFormatterConfig, comments: TComment[]) {
+    this._id              = NodeCounter;
     NodeCounter++;
-    this.parent = parent;
-    this.config = config;
+    this.parent           = parent;
+    this.prev             = prev;
+    this.config           = config;
+    this.leadingComments  = [];
+    this.trailingComments = [];
+    
     this.range = {
       start: {
         line: null,
@@ -187,16 +208,19 @@ export const NodeExtensionBase: INodeExtensionBase =
     };
     if(typeof this._children === "function")
       this.children = Array.from(this._children()).filter(c => c != null);
-      
-    this.leadingComments = Array.from(this.takeLeadingComments(comments))
-      .map(l => extendComment(l, this, sourceCode));
-  },
-  takeLeadingComments: function*(this: ExtendedNode, comments: TComment[]): Generator<TComment> {
-    for(let c of comments.slice())
+    
+    if(this.takesLeadingComments != false)
     {
-      if(this.tokenRange.positionStart.codeUnit >= c.positionEnd.codeUnit)
+      for(let c of getLeadingComments(this, comments))
       {
-        yield comments.splice(comments.indexOf(c), 1)[0];
+        if(this.prev != null && c.positionStart.lineNumber == this.prev.tokenRange.positionEnd.lineNumber)
+        {
+          this.prev.trailingComments.push(extendComment(c, this.prev, "trail"))
+        }
+        else
+        {
+          this.leadingComments.push(extendComment(c, this, "prev"));
+        }
       }
     }
   },
@@ -213,17 +237,36 @@ export const NodeExtensionBase: INodeExtensionBase =
     this.wsBefore = wsBefore ?? 0;
     this.wsAfter  = wsAfter ?? 0;
   },
-  formatLeadingComments: function(this: IPrivateNodeExtension): FormatResult {
+  finishFormat: function(this: IPrivateNodeExtension)
+  {
+  },
+  formatLeadingComments: function(this: IPrivateNodeExtension): [FormatResult, IFormatState] {
     let i = 0;
+    let state = this.state;
     for(let c of this.leadingComments)
     {
-      let r = c.format(this.state, this.config, i != 0);
-      if(r[0] == FormatResult.Break && this.state.stopOnLineBreak == true)
-        return FormatResult.Break;
-      this.state = r[1];
+      let result = c.format(state, this.config, i != 0);
+      state = {
+        ...this.state,
+        ...c.range.end
+      };
+      if(result == FormatResult.Break && this.state.stopOnLineBreak == true)
+        return [FormatResult.Break, state];
       i++;
     }
-    return FormatResult.Ok;
+    return [FormatResult.Ok, state];
+  },
+  formatTrailingComments: function(this: IPrivateNodeExtension): [FormatResult, IFormatState] {
+    //trailing comments can never break line!
+    let i = 0;
+    let state = this.subState(this.range.end);
+    for(let c of this.trailingComments)
+    {
+      let result = c.format(state, this.config, i != 0);
+      state = this.subState(c.range.end);
+      i++;
+    }
+    return [FormatResult.Ok, state];
   },
   hasContentString: function(this: IPrivateNodeExtension) {
     return typeof this.getContentString === "function";
@@ -308,6 +351,7 @@ export const NodeExtensionBase: INodeExtensionBase =
     });
     this.leadingComments.forEach(c => c.updateTokenRange());
     this.children.forEach(c => c.updateTokenRange());
+    this.trailingComments.forEach(c => c.updateTokenRange());
   }
   // format: function*(this: PrivateExtendedNode, state: IFormatState, wsBefore: number = null, wsAfter: number = null): FormatResult {
   //   this._formatCnt++;

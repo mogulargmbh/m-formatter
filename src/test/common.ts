@@ -15,17 +15,10 @@ function stripBom(text: string): string
 }
 
 
-export async function getConnectorCases(): Promise<{name: string, code: string}[]>
+export function getConnectorCases():{name: string, code: string}[]
 {
   let pattern = path.join("test-cases", "ms_connector", "*.pq");
-  let files = await new Promise<string[]>((resolve, reject) => {
-    glob(pattern.replace(/\\/g, "/"), {}, (err, matches) => {
-      if(err)
-        reject(err);
-      else
-        resolve(matches);
-    });
-  });
+  let files = glob.sync(pattern.replace(/\\/g, "/"), {});
   let res = [];
   for(let f of files)
   {

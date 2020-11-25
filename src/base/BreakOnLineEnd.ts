@@ -5,11 +5,13 @@ import { FormatResult, IFormatState, PrivateExtendedNode, retGen, NodeExtensionB
 export function format(this: PrivateExtendedNode, state: IFormatState, wsBefore: number = null, wsAfter: number = null, opts = null): FormatResult
 {
   this.initFormat(state, wsBefore, wsAfter, opts);
-  let res = this.formatLeadingComments()
+  this.setRangeStart();
+  
+  let [res, s] = this.formatLeadingComments();
+  this.state = s;
   if(res == FormatResult.Break && this.state.stopOnLineBreak)
     return FormatResult.Break;
     
-  this.setRangeStart();
   
   if(this.state.forceLineBreak != true)
   {
@@ -36,6 +38,14 @@ export function format(this: PrivateExtendedNode, state: IFormatState, wsBefore:
   }
   
   this.setRangeEnd(this.lastChild() ?? this.state);
+  
+  if(this.trailingComments.any())
+  {
+    let [res2, s2] = this.formatTrailingComments();
+    this.setRangeEnd(s2);
+  }
+  
+  this.finishFormat();
   return res;
 }
 

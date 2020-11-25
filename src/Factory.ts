@@ -1,14 +1,23 @@
 import { Ast, TComment } from "./pq-ast";
-import { BinaryOperatorExpressionExtension, BracedArrayWrapperExtension, ConstantExtension, IdentifierExpressionExtension, IdentifierExtension, LiteralExpressionExtension, PairedExpressionExtension, UnaryExpressionExtension, ArrayWrapperExtension, LetExpressionExtension, CsvExtension, BracedWrapperExtension, BaseTypeExtension, PrimitiveTypeExtension, IfExpressionExtension, FunctionExpressionExtension, PairedConstantExtension, ErrorHandlingExpressionExtension, FieldSpecificationExtension, FieldTypeSpecificationExtension, FunctionTypeExtension, NotImplementedExpressionExtension, RecordTypeExtension, RecursivePrimaryExpressionExtension, SectionExtension, SectionMemberExtension, TableTypeExtension, ParameterExtension, RangeExpressionExtension, BracedWrapperOptionalExtension } from "./node-extensions/all";
+import { BinaryOperatorExpressionExtension, BracedArrayWrapperExtension, ConstantExtension, IdentifierExpressionExtension, IdentifierExtension, LiteralExpressionExtension, PairedExpressionExtension, UnaryExpressionExtension, ArrayWrapperExtension, LetExpressionExtension, CsvExtension, BracedWrapperExtension, BaseTypeExtension, PrimitiveTypeExtension, IfExpressionExtension, FunctionExpressionExtension, PairedConstantExtension, ErrorHandlingExpressionExtension, FieldSpecificationExtension, FieldTypeSpecificationExtension, FunctionTypeExtension, NotImplementedExpressionExtension, RecordTypeExtension, RecursivePrimaryExpressionExtension, SectionExtension, SectionMemberExtension, TableTypeExtension, ParameterExtension, RangeExpressionExtension, BracedWrapperOptionalExtension, FieldProjectionExtension, FieldSpecificationListExtension } from "./node-extensions/all";
 import { assertnever } from './Util';
 import { ExtendedNode, IPrivateNodeExtension, INodeExtensionBase } from './base/Base';
 import { IFormatterConfig } from './config/definitions';
+import { extendComment } from './CommentExtension';
 
-export function extendAll(node: Ast.INode, sourceCode: string, config: IFormatterConfig, comments: TComment[], parent: ExtendedNode = null): ExtendedNode
+export function extendAll(node: Ast.INode, sourceCode: string, config: IFormatterConfig, comments: TComment[], parent: ExtendedNode = null, previous: ExtendedNode = null): ExtendedNode
 {
   let res = extend(node);
-  res.initialize(sourceCode, parent, config, comments);
-  res.children.forEach(c => extendAll(c, sourceCode, config, comments, res));
+  res.initialize(parent, previous, config, comments);
+  let prev = res;
+  for(let c of res.children)
+  {
+    prev = extendAll(c, sourceCode, config, comments, res, prev);
+  }
+  
+  if(parent == null) //root node
+    res.trailingComments = comments.map(c => extendComment(c, res, "trail"));
+  
   return res;
 }
 export function extend(node: Ast.INode, parent: ExtendedNode = null): ExtendedNode
@@ -60,10 +69,12 @@ export function getExtension(kind: Ast.NodeKind): IPrivateNodeExtension
         return LiteralExpressionExtension;
     case Ast.NodeKind.UnaryExpression:
       return UnaryExpressionExtension;
+    case Ast.NodeKind.FieldProjection:
+      return FieldProjectionExtension;
+    case Ast.NodeKind.FieldSpecificationList:
+      return FieldSpecificationListExtension;
     case Ast.NodeKind.ListExpression:
     case Ast.NodeKind.ParameterList:
-    case Ast.NodeKind.FieldProjection:
-    case Ast.NodeKind.FieldSpecificationList:
     case Ast.NodeKind.InvokeExpression:
     case Ast.NodeKind.ListExpression:
     case Ast.NodeKind.ListLiteral:

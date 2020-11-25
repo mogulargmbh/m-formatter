@@ -1,25 +1,30 @@
 import { IFormatterConfig } from './config/definitions';
 import { TComment } from './pq-ast';
 import { ExtendedNode, Range, IFormatState, FormatResult } from './base/Base';
+import { assertnever } from './Util';
 
 type ICommentExtensionBase = {
   trailingNewLine: boolean,
   leadingNewLine: boolean,
   range: Range,
-  initialize: (node: ExtendedNode, sourceCode: string) => void;
-  format: (state: IFormatState, config: IFormatterConfig, suppressLeadingLineBreak?: boolean) => [FormatResult, IFormatState];
+  node: ExtendedNode,
+  initialize: (node: ExtendedNode) => void;
+  format: (state: IFormatState, config: IFormatterConfig, suppressLeadingLineBreak?: boolean) => FormatResult;
   updateTokenRange: () => void;
 }
 
-export type ExtendedComment = TComment & ICommentExtensionBase;
+type TCommentKind = "prev"|"trail";
 
-export function extendComment(comment: TComment, node: ExtendedNode, code: string): ExtendedComment
+export type ExtendedComment = TComment & ICommentExtensionBase & { commentKind: TCommentKind };
+
+export function extendComment(comment: TComment, node: ExtendedNode, kind: TCommentKind): ExtendedComment
 {
-  let res = {
+  let res: ExtendedComment = {
     ...comment,
-    ...CommentExtensionBase
+    ...CommentExtensionBase,
+    commentKind: kind
   };
-  res.initialize(node, code);
+  res.initialize(node);
   return res;
 }
 
@@ -36,8 +41,10 @@ function getPreviousNode(node: ExtendedNode): ExtendedNode
 const CommentExtensionBase: ICommentExtensionBase = {
   leadingNewLine: false,
   trailingNewLine: false,
+  node: null,
   range: null,
-  initialize: function(this: ExtendedComment, node: ExtendedNode, sourceCode: string) {
+  initialize: function(this: ExtendedComment, node: ExtendedNode) {
+    this.node = node;
     this.range = {
       start: null,
       end: null,
@@ -57,56 +64,125 @@ const CommentExtensionBase: ICommentExtensionBase = {
       lineCodeUnit: this.range.end.unit
     });
   },
-  format: function(this: ExtendedComment, state: IFormatState, config: IFormatterConfig, suppressLeadingLineBreak = false): [FormatResult, IFormatState] {
+  format: function(this: ExtendedComment, state: IFormatState, config: IFormatterConfig, suppressLeadingLineBreak = false): FormatResult {
     let { line, unit } = state;
     
-    if((this.trailingNewLine == true || this.leadingNewLine == true) && state.stopOnLineBreak == true)
-      return [FormatResult.Break, state];
-    
-    if(this.leadingNewLine == true && suppressLeadingLineBreak == false)
+    switch(this.commentKind)
     {
-      if(state.suppressInitialLineBreak != true)
-        line = state.line + 1;
+      case "trail": 
+      {
+        if(this.positionStart.lineNumber != this.node.tokenRange.positionEnd.lineNumber)
+        {
+          line += 1;
+          unit = config.indentationLength * state.indent;
+          this.range.start = {
+            line,
+            unit: config.indentationLength * state.indent
+          };
+        }
+        else
+        {
+          unit += 1;
+          this.range.start = {
+            line,
+            unit
+          };
+        }
         
-      unit = config.indentationLength * state.indent;
-      this.range.start = {
-        line,
-        unit,
+        this.range.end = {
+          line,
+          unit: unit + this.data.length
+        }
+        return FormatResult.Ok;
       }
-      unit += this.data.length;
-      this.range.end = {
-        line,
-        unit
+      case "prev":
+      {
+        if(this.leadingNewLine == true && state.suppressInitialLineBreak == false)
+        {
+          line += 1;
+          unit = config.indentationLength * state.indent;
+          this.range.start = {
+            line,
+            unit
+          };
+        }
+        else
+        {
+          this.range.start = {
+            line,
+            unit
+          }
+        }
+        
+        if(this.trailingNewLine == true)
+        {
+          this.range.end = {
+            line: line + 1,
+            unit: config.indentationLength * state.indent
+          }
+        }
+        else
+        {
+          this.range.end = {
+            line: line,
+            unit: unit + this.data.length
+          }
+        }
+        return FormatResult.Ok;
+      }
+      default: 
+      {
+        assertnever(this.commentKind);
       }
     }
-    else
-    {
-      line = state.line;
-      unit = state.unit;
-      this.range.start = {
-        line,
-        unit
-      }
+    
+    // if((this.trailingNewLine == true || this.leadingNewLine == true) && state.stopOnLineBreak == true)
+    //   return FormatResult.Break;
+    
+    // if(this.leadingNewLine == true && suppressLeadingLineBreak == false)
+    // {
+    //   if(state.suppressInitialLineBreak != true)
+    //     line = state.line + 1;
+        
+    //   unit = config.indentationLength * state.indent;
+    //   this.range.start = {
+    //     line,
+    //     unit,
+    //   }
+    //   unit += this.data.length;
+    //   this.range.end = {
+    //     line,
+    //     unit
+    //   }
+    // }
+    // else
+    // {
+    //   line = state.line;
+    //   unit = state.unit;
+    //   this.range.start = {
+    //     line,
+    //     unit
+    //   }
       
-      unit += this.data.length;
-      this.range.end = {
-        line,
-        unit: unit
-      }
-    }
+    //   unit += this.data.length;
+    //   this.range.end = {
+    //     line,
+    //     unit: unit
+    //   }
+    // }
     
-    if(this.trailingNewLine == true)
-    {
-      unit = config.indentationLength * state.indent;
-      line++;
-    }
+    // if(this.trailingNewLine == true)
+    // {
+    //   unit = config.indentationLength * state.indent;
+    //   line++;
+    // }
     
-    let resultState = {
-      ...state,
-      line,
-      unit
-    }
+    // let resultState = {
+    //   ...state,
+    //   line,
+    //   unit
+    // }
     
-    return [FormatResult.Ok, resultState];
+    return FormatResult.Ok;
   }
 }

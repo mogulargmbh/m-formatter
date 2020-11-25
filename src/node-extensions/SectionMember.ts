@@ -48,6 +48,7 @@ function *_children(this: This)
 export const SectionMemberExtension: IPrivateNodeExtension = {
   _ext: "SectionMember",
   ...AlwaysInlineNodeBase,
+  takesLeadingComments: false,
   _formatInline,
   _formatBroken: NotSupported,
   _children,

@@ -2,13 +2,7 @@ import { Ast } from "../pq-ast";
 import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension } from '../base/Base';
 import { BreakOnAnyChildBrokenNodeBase } from '../base/BreakOnAnyChild';
 
-type NodeType = Ast.ListExpression
-  | Ast.IParameterList<Ast.TParameterType> 
-  | Ast.InvokeExpression
-  | Ast.ListExpression
-  | Ast.ListLiteral 
-  | Ast.RecordExpression
-  | Ast.RecordLiteral;
+type NodeType =  Ast.FieldProjection;
   
 type This = ExtendedNode<NodeType>;
 
@@ -21,6 +15,9 @@ function *_formatInline(this: This): FormatGenerator
   
   s = this.subState(this.content.range.end);
   yield this.closeWrapperConstant.format(s);
+  
+  if(this.maybeOptionalConstant)
+    yield this.maybeOptionalConstant.format(this.subState(this.closeWrapperConstant.range.end));
     
   return FormatResult.Ok;
 }
@@ -44,6 +41,9 @@ function _formatBroken(this: This)
     indent: this.state.indent
   }));
   
+  if(this.maybeOptionalConstant)
+    this.maybeOptionalConstant.format(this.subState(this.closeWrapperConstant.range.end));
+  
   return FormatResult.Ok;
 }
 
@@ -52,10 +52,11 @@ function *_children(this: This): IEnumerable<ExtendedNode>
   yield this.openWrapperConstant;
   yield this.content;
   yield this.closeWrapperConstant;
+  yield this.maybeOptionalConstant;
 }
 
-export const BracedArrayWrapperExtension: IPrivateNodeExtension = {
-  _ext: "BracedArrayWrapper",
+export const FieldProjectionExtension: IPrivateNodeExtension = {
+  _ext: "FieldProjection",
   ...BreakOnAnyChildBrokenNodeBase,
   _formatBroken,
   _formatInline,

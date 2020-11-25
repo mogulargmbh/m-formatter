@@ -36,7 +36,7 @@ function _formatBroken(this: This): FormatResult
   
   s = this.subState({
     line: this.semicolonConstant.range.end.line + 1,
-    unit: this.currIndentUnit(),
+    unit: this.config.indentSectionMembers == true ? this.nextIndentUnit() : this.currIndentUnit(),
     indent: this.state.indent + (this.config.indentSectionMembers == true ? 1 : 0),
     forceLineBreak: true,
     suppressInitialLineBreak: true

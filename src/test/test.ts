@@ -21,8 +21,7 @@ function runTest(code: string, identifier: any)
     let ast = format(code, formatterConfig)
     let result = serializer.serialize(ast, {
       debugMode: true
-    })
-    
+    });
     
     let el = new jsdom.JSDOM(`<!DOCTYPE html>${result}`);
     let content = el.window.document.body.textContent;
@@ -34,7 +33,15 @@ function runTest(code: string, identifier: any)
       console.log(`Test ${identifier} failed\nShould/Result:\n${should}\n${content}`);
       
     //check if textContent can be parsed
-    parse(content);
+    try
+    {
+      parse(content);
+    }
+    catch(error)
+    {
+      console.log(`Test ${identifier} failed, cannot reparse result. Reason: ${error}`);
+      throw error;
+    }
     
     results.push([result, identifier, code]);
   }
@@ -55,7 +62,7 @@ async function main()
     i++;
   }
   
-  let connectorCases = await getConnectorCases();
+  let connectorCases = getConnectorCases();
   for(let c of connectorCases)
   {
     runTest(c.code, c.name);
