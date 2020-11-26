@@ -86,7 +86,7 @@ export const defaultFormatterConfig: IFormatterConfig = {
   includeComments: true,
   alignLineCommentsToPosition: null,
   indentSectionMembers: true,
-  newLineCsvInLet: false,
+  // newLineCsvInLet: false,
 }
 
 export var defaultTextSerializerConfig: ITextAstSerializerConfig = {

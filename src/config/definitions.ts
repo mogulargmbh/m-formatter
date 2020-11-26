@@ -20,7 +20,7 @@ export interface IFormatterConfig
   //Includes comments in the format results, default = true
   includeComments: boolean;
   //Newline after CSV under LetExpression
-  newLineCsvInLet: boolean;
+  // newLineCsvInLet: boolean;
   //Indent section members
   indentSectionMembers: boolean;
   //Align line comments
