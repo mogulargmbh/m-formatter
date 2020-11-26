@@ -2,14 +2,53 @@ import { Optional } from '../interfaces';
 import { Ast } from "../pq-ast";
 import { ExtendedNode, FormatGenerator, FormatResult, genRes, IEnumerable, IPrivateNodeExtension, PrivateExtendedNode, PrivateNode } from '../base/Base';
 import { BreakOnAnyChildBrokenNodeBase } from '../base/BreakOnAnyChild';
+import { PairedExpressionOpts } from './PairedExpression';
+import { AlignmentStrategy } from '../config/definitions';
 
 export interface IArrayWrapperOpts 
 {
-  inlineWsBefore?: (node: ExtendedNode, index: number, length: number) => number;
-  inlineWsAfter?: (node: ExtendedNode, index: number, length: number) => number;
+  inlineWsBefore?: (node: ExtendedNode, index: number, length: number) => number; //only inline
+  inlineWsAfter?: (node: ExtendedNode, index: number, length: number) => number;  //only inline
 }
 
-type This = PrivateNode<Ast.IArrayWrapper<Ast.TCsvType>, Optional<IArrayWrapperOpts>>;
+type This = PrivateNode<Ast.TArrayWrapper, Optional<IArrayWrapperOpts>>;
+
+function isCsv(node: Ast.INode): node is Ast.ICsv<any>
+{
+  return node.kind == Ast.NodeKind.Csv;
+}
+
+type PairedExpr = Ast.IdentifierPairedExpression | Ast.GeneralizedIdentifierPairedExpression | Ast.GeneralizedIdentifierPairedAnyLiteral;
+function isPairedExpression(node: Ast.INode): node is PairedExpr
+{
+  return node.kind == Ast.NodeKind.IdentifierPairedExpression 
+    || node.kind == Ast.NodeKind.GeneralizedIdentifierPairedExpression 
+    || node.kind == Ast.NodeKind.GeneralizedIdentifierPairedAnyLiteral;
+}
+
+function isPairedExpressionArray(node: This): node is PrivateNode<Ast.IArrayWrapper<Ast.ICsv<PairedExpr>>>
+{
+  return node.elements.all(e => isCsv(e) && isPairedExpression(e.node));
+}
+
+function getAlignmentStrategy(node: This): AlignmentStrategy
+{
+  let parent = node.parent;
+  let s = AlignmentStrategy.never;
+  
+  if(parent.kind == Ast.NodeKind.LetExpression)
+    s = node.config.alignPairedLetExpressionsByEqual;
+  else if(parent.kind == Ast.NodeKind.RecordExpression || parent.kind == Ast.NodeKind.RecordLiteral || parent.kind == Ast.NodeKind.RecordType)
+    s = node.config.alignPairedRecordExpressionsByEqual;
+  else
+    return AlignmentStrategy.never;
+  
+  if(isPairedExpressionArray(node) == false)
+    s = AlignmentStrategy.never;
+    
+  return s;
+}
+
 
 function *_formatInline(this: This): FormatGenerator
 {
@@ -31,9 +70,29 @@ function *_formatInline(this: This): FormatGenerator
   return FormatResult.Ok;
 }
 
+function formatElements(node: This, opts: any, line: number, indent: number, unit: number, breakOnNewline: boolean) 
+{
+  for(let c of node.elements)
+  {
+    let s = node.subState({
+      line, 
+      unit,
+      indent,
+      suppressInitialLineBreak: true
+    });
+    let res = c.format(s, null, null, opts);
+    if(c.range.end.line != line && breakOnNewline == true)
+      return false;
+      
+    line = c.range.end.line + 1;
+  }
+  return true;
+}
+
 function _formatBroken(this: This): FormatResult
 {
   let line: number, indent: number, unit: number;
+  
   
   if(this.elements.length == 1)
   {
@@ -56,17 +115,30 @@ function _formatBroken(this: This): FormatResult
     unit = this.currIndentUnit();
   }
   
-  for(let c of this.elements)
+  let strategy = getAlignmentStrategy(this);
+  if(strategy == AlignmentStrategy.never)
   {
-    let s = this.subState({
-      line, 
-      unit,
-      indent,
-      suppressInitialLineBreak: true
-    });
-    c.format(s);
-      
-    line = c.range.end.line + 1;
+    formatElements(this, null, line, indent, unit, false);
+  }
+  else
+  {
+    
+    let keyLength = (this as Ast.IArrayWrapper<Ast.ICsv<PairedExpr>>).elements.reduce((c,v) => c < v.node.key.literal.length ? v.node.key.literal.length : c, 0);
+    let opts: PairedExpressionOpts = {
+      alignKeys: keyLength
+    };
+    if(strategy == AlignmentStrategy.always)
+    {
+      formatElements(this, opts, line, indent, unit, false);
+    }
+    else //singleline
+    {
+      if(formatElements(this, opts, line, indent, unit, true) == false)
+      {
+        opts.alignKeys = null;
+        formatElements(this, opts, line, indent, unit, false);
+      }
+    }
   }
   
   return FormatResult.Ok;

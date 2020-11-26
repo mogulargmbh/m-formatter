@@ -1,6 +1,6 @@
 import { TConstant } from '@microsoft/powerquery-parser/lib/language/ast/ast';
 import { Ast } from "../pq-ast";
-import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension } from '../base/Base';
+import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension, PrivateNode } from '../base/Base';
 import { BreakOnLineEndNodeBase } from '../base/BreakOnLineEnd';
 import { NotSupported } from '../Util';
 
@@ -8,13 +8,24 @@ type PairedExpression = Ast.IdentifierPairedExpression
   | Ast.GeneralizedIdentifierPairedExpression
   | Ast.GeneralizedIdentifierPairedAnyLiteral;
   
-type This = ExtendedNode<PairedExpression>;
+export type PairedExpressionOpts = {
+  alignKeys: number;
+}
+  
+type This = PrivateNode<PairedExpression, PairedExpressionOpts>;
 
 function *_formatInline(this: This): FormatGenerator
 {
   yield this.key.format(this.subState());
   
-  yield this.equalConstant.format(this.subState(this.key.range.end), 1, 1);
+  if(this.opts.alignKeys != null)
+  {
+    yield this.equalConstant.format(this.subState(this.key.range.end), this.opts.alignKeys - this.key.literal.length + 1, 1); 
+  }
+  else
+  {
+    yield this.equalConstant.format(this.subState(this.key.range.end), 1, 1);
+  }
   
   yield this.value.format(this.subState(this.equalConstant.range.end));
     
@@ -42,8 +53,15 @@ function *_children(this: This)
   yield this.value;
 }
 
+const defaultOpts: PairedExpressionOpts = {
+  alignKeys: null
+}
+
 export const PairedExpressionExtension: IPrivateNodeExtension = {
   _ext: "PairedExpression",
+  opts: {
+    ...defaultOpts
+  },
   ...BreakOnLineEndNodeBase,
   takesLeadingComments: false,
   _formatInline,

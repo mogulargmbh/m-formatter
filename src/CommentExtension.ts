@@ -83,6 +83,7 @@ const CommentExtensionBase: ICommentExtensionBase = {
         else
         {
           unit += 1;
+          unit = Math.max(unit, config.alignLineCommentsToPosition ?? 0);
           this.range.start = {
             line,
             unit

@@ -209,7 +209,7 @@ export const NodeExtensionBase: INodeExtensionBase =
     if(typeof this._children === "function")
       this.children = Array.from(this._children()).filter(c => c != null);
     
-    if(this.takesLeadingComments != false)
+    if(config.includeComments == true && this.takesLeadingComments != false)
     {
       for(let c of getLeadingComments(this, comments))
       {
@@ -225,6 +225,7 @@ export const NodeExtensionBase: INodeExtensionBase =
     }
   },
   initFormat: function(this: IPrivateNodeExtension, state: IFormatState, wsBefore: number, wsAfter: number, opts: any) {
+    this.isBroken = false;
     this._formatCnt++;
     if(opts != null)
     {

@@ -6,6 +6,10 @@ import { buildTestPage } from './testPage';
 import { FormatError } from '../Error';
 import { HtmlAstSerializer } from '../serializer/HtmlAstSerializer';
 import { parse } from 'path';
+import { performance } from 'perf_hooks';
+import { Optional } from '../interfaces';
+import { IFormatterConfig, IHtmlSerializerConfig } from '../config/definitions';
+
 
 let results: [string|FormatError,number,string][] = [];
 
@@ -15,22 +19,28 @@ function runTest(code: string, identifier: any)
   console.log(`Running test ${identifier}`);
   try
   {
-    let formatterConfig = {
-      
+    let formatterConfig: Optional<IFormatterConfig> = {
     };
-    let ast = format(code, formatterConfig)
-    let result = serializer.serialize(ast, {
+    let serializerConfig: Optional<IHtmlSerializerConfig> = {
       debugMode: true
-    });
+    }
+    let success =  true;
+    let start   = performance.now();
+    let ast     = format(code, formatterConfig)
+    let result  = serializer.serialize(ast, serializerConfig);
+    let end     = performance.now();
     
-    let el = new jsdom.JSDOM(`<!DOCTYPE html>${result}`);
+    let el      = new jsdom.JSDOM(`<!DOCTYPE html>${result}`);
     let content = el.window.document.body.textContent;
     
     //Check if textContent == code (ignore all whitespace)
-    let is = content.replace(/\s/g, "");
+    let is     = content.replace(/\s/g, "");
     let should = code.replace(/\s/g, "");
     if(is != should)
+    {
+      success = false;
       console.log(`Test ${identifier} failed\nShould/Result:\n${should}\n${content}`);
+    }
       
     //check if textContent can be parsed
     try
@@ -44,6 +54,8 @@ function runTest(code: string, identifier: any)
     }
     
     results.push([result, identifier, code]);
+    console.log(`-- success in ${end-start}ms`);
+
   }
   catch(err)
   {

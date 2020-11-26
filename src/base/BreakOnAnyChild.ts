@@ -32,7 +32,7 @@ export function format(this: PrivateExtendedNode, state: IFormatState, wsBefore:
       return FormatResult.Break;
       
     this.isBroken = true;
-    res = this._formatBroken()
+    res = this._formatBroken();
   }
   
   this.setRangeEnd(this.lastChild() ?? this.state);

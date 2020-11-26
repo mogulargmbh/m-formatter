@@ -15,7 +15,7 @@ export function extendAll(node: Ast.INode, sourceCode: string, config: IFormatte
     prev = extendAll(c, sourceCode, config, comments, res, prev);
   }
   
-  if(parent == null) //root node
+  if(parent == null && config.includeComments == true) //root node
     res.trailingComments = comments.map(c => extendComment(c, res, "trail"));
   
   return res;
