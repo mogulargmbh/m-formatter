@@ -55,3 +55,29 @@ This is not an official microsoft repository. There is an official microsoft [po
 
 # TODO
 This formatter is not totally finished. It's actually a rewrite of the first version that I built and that is currently accessible at [powerqueryformatter.com](https://www.powerqueryformatter.com). There are still some issues with this newer, much faster and more structured version. For example comments are still causing some problems and some test cases don't pass. Also the configuration parameters are not implemented at the moment! I will get back to fixing that once I return from holidays. Also have a look at the open issues.
+
+
+# HtmlAstSerializer
+Available css classes to style
+- constant
+  - type
+    - type-modifier
+    - type-primitive
+  - operator
+    - operator-arithmetic
+    - operator-equality
+    - operator-relational
+    - operator-unary
+    - operator-keyword
+  - keyword
+  - bracket
+    - bracket-{n}
+- literal
+  - list
+  - boolean
+  - null
+  - number
+  - record
+  - string
+- identifier
+- type

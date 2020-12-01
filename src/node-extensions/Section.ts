@@ -10,8 +10,6 @@ type This = ExtendedNode<PairedExpression>;
 
 function _formatBroken(this: This): FormatResult
 {
-  this.setRangeStart();
-  
   let s = this.subState();
   if(this.maybeLiteralAttributes)
   {

@@ -58,7 +58,7 @@ export class TextAstSerializer extends BaseAstSerializer<WritableTokenPosition, 
     return result;
   }
   
-  _serialize(n: ExtendedNode): string
+  protected _serialize(n: ExtendedNode): string
   {
     return this.visit(n);
   }

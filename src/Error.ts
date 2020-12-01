@@ -1,8 +1,8 @@
-export type ErrorKind = "UNKNOWN" | "PARSER_ERROR" | "FORMATTER_ERROR" | "CSS_ERROR" | "INVALID_CONFIG" | "UNKNOWN_ENTITY";
+export type ErrorKind = "UNKNOWN" | "PARSER_ERROR" | "FORMATTER_ERROR" | "SERIALIZATION_ERROR";
 
-export class FormatError extends Error
+export class GenericError<T> extends Error
 {
-  constructor(message: string, public kind: ErrorKind, public innerError: Error = null, public meta: any = null)
+  constructor(message: string, public kind: T, public innerError: Error = null, public meta: any = null)
   {
     super(message);
   }
@@ -16,4 +16,9 @@ inner: ${this.innerError?.message}
 innerStack: ${this.innerError?.stack}
 meta: ${JSON.stringify(this.meta)}`;
   }
+}
+
+export class FormatError extends GenericError<ErrorKind>
+{
+  
 }

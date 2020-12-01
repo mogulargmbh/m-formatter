@@ -98,7 +98,7 @@ export class HtmlAstSerializer extends BaseAstSerializer<{ bracket: number } & W
     return result;
   }
   
-  _serialize(node: ExtendedNode): string
+  protected _serialize(node: ExtendedNode): string
   {
     let serialized = this.visit(node);
     return serialized;

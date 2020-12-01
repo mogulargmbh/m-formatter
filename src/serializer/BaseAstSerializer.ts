@@ -2,6 +2,7 @@ import { Cursor, ExtendedNode, traverse } from '../base/Base';
 import { TokenPosition } from '@microsoft/powerquery-parser/lib/language/token';
 import { IAstSerializer } from './IAstSerializer';
 import { Optional } from '../interfaces';
+import { FormatError } from '../Error';
 
 export type WritableTokenPosition = {
   lineNumber: number,
@@ -25,7 +26,7 @@ export abstract class BaseAstSerializer<T extends WritableTokenPosition, TConfig
     
   }
   
-  abstract _serialize(n: ExtendedNode): string;
+  protected abstract _serialize(n: ExtendedNode): string;
   
   getInitialState(): T
   {
@@ -37,12 +38,19 @@ export abstract class BaseAstSerializer<T extends WritableTokenPosition, TConfig
   
   serialize(ast: ExtendedNode, config: Optional<TConfig> = null): string
   {
-    this.state = this.getInitialState()
-    this.config = {
-      ...this.defaultConfig,
-      ...(config ?? {})
+    try
+    {
+      this.state = this.getInitialState()
+      this.config = {
+        ...this.defaultConfig,
+        ...(config ?? {})
+      }
+      return this._serialize(ast);
     }
-    return this._serialize(ast);
+    catch(err)
+    {
+      throw new FormatError("Could not serialize ast", "SERIALIZATION_ERROR", err); 
+    }
   }
   
   assertPosition(pos: WritableTokenPosition)
