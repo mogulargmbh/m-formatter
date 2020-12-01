@@ -33,11 +33,8 @@ export interface IFormatterConfig
 
 export interface ITextAstSerializerConfig
 {
-  debugMode?: boolean;
   //String that is used as a whitespace, default = " "
   ws: string;
-  //String that is used for indentation, default = "  ". Indentation length of FormatterConfig must be set accordingly
-  indentation: string;
   //String that is used to terminate a line, default = "\n"
   lineEnd: string;
 }
@@ -57,7 +54,6 @@ export interface IHtmlSerializerConfig
   inlineCss: string;
   //Toggles inline css usage;
   inlineCssToggle: boolean;
-  //Includes comments in the format results, default = true
 }
 
 

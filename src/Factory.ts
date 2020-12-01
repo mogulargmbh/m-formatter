@@ -20,12 +20,22 @@ export function extendAll(node: Ast.INode, sourceCode: string, config: IFormatte
   
   return res;
 }
+
+function isExtendedNode(node: Ast.INode): node is ExtendedNode
+{
+  return (node as ExtendedNode).__extendedNode == true;
+}
+
 export function extend(node: Ast.INode, parent: ExtendedNode = null): ExtendedNode
 {
-  let ext = {
-    ...getExtension(node.kind)
-  };
-  Object.assign(node, ext);
+  let ext: any;
+  if(isExtendedNode(node) == false)
+  {
+    ext = {
+      ...getExtension(node.kind)
+    };
+    Object.assign(node, ext);
+  }
   let res = node as ExtendedNode;
   return res;
 }

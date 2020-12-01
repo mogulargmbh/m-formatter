@@ -2,6 +2,7 @@ import { ExtendedNode } from '../base/Base';
 import { ITextAstSerializerConfig } from '../config/definitions';
 import { BaseAstSerializer } from './BaseAstSerializer';
 import { defaultTextSerializerConfig } from '../config/default';
+import { ExtendedComment } from '../CommentExtension';
 
 export type WritableTokenPosition = {
   lineNumber: number,
@@ -14,23 +15,30 @@ export class TextAstSerializer extends BaseAstSerializer<WritableTokenPosition, 
   {
     super(defaultTextSerializerConfig)
   }
+  
+  visitComment(c: ExtendedComment): string
+  {
+    let result = c.data;
+    this.state.lineCodeUnit += c.data.length;
+    result += this.moveCursor(c.positionEnd);
+    return result;
+  }
+  
   visit(n: ExtendedNode): string
   {
     let result = "";
+    result += this.moveCursor(n.tokenRange.positionStart);
+    
     for(let c of n.leadingComments)
     {
-      result += this.moveCursor(c.positionStart);
-      result += c.data;
-      result += this.moveCursor(c.positionEnd);
+      result += this.visitComment(c);
     }
-    
-    result = this.moveCursor(n.tokenRange.positionStart);
     
     if(n.isLeaf === true)
     {
-      result += n.getContentString();
-      this.state.lineNumber = n.tokenRange.positionEnd.lineNumber;
-      this.state.lineCodeUnit = n.tokenRange.positionEnd.lineCodeUnit;
+      let content = n.getContentString();
+      result += content;
+      this.state.lineCodeUnit += content.length;
     }
     else
     {
@@ -38,11 +46,28 @@ export class TextAstSerializer extends BaseAstSerializer<WritableTokenPosition, 
       {
         result += this.visit(c); 
       }
-      
-      result += this.moveCursor(n.tokenRange.positionEnd);
     }
     
+    for(let c of n.trailingComments)
+    {
+      result += this.visitComment(c);
+    }
+    
+    result += this.moveCursor(n.tokenRange.positionEnd);
+    
     return result;
+  }
+  
+  convertIndentation(code: string, ws: string, indentationLength: number, newIndentationString: string)
+  {
+    return code
+      .split(/\n/g)
+      .map(l => l.replace(new RegExp(`^([ \u00A0]+)`, "g"), (s,g) => {
+        let len = g.length;
+        let rest = len % indentationLength;
+        return newIndentationString.repeat(Math.floor(len / indentationLength)) + ws.repeat(rest);
+      }))
+      .join("\n");
   }
   
 }

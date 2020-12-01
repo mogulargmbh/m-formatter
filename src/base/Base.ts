@@ -57,6 +57,7 @@ export type FormatGenerator = Generator<FormatResult, FormatResult | void>
 
 export interface INodeExtensionBase
 {
+  __extendedNode: boolean;
   leadingComments: ExtendedComment[];
   trailingComments: ExtendedComment[];
   parent: ExtendedNode;
@@ -174,6 +175,7 @@ function getLeadingComments(node: ExtendedNode, comments: TComment[]): ExtendedC
 
 export const NodeExtensionBase: INodeExtensionBase =
 {
+  __extendedNode: true,
   parent: null,
   prev: null,
   state: null,

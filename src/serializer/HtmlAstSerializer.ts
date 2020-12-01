@@ -9,6 +9,7 @@ import { BaseAstSerializer } from './BaseAstSerializer';
 import { IHtmlSerializerConfig } from '../config/definitions';
 import { defaultHtmlSerializerConfig } from '../config/default';
 import { ExtendedComment } from '../CommentExtension';
+import { Optional } from '../interfaces';
 
 export type literalClass = "string" | "list" | "boolean" | "number" | "null" | "record";
 export type operatorConstantClass = "operator" | "operator-keyword" | "operator-arithmetic" | "operator-equality" | "operator-logical" | "operator-relational" | "operator-unary" | "operator-keyword";
@@ -18,8 +19,7 @@ export type tokenClass = "operator-dot" |"comment" | "keyword" | "constant" | "i
 
 export class HtmlAstSerializer extends BaseAstSerializer<{ bracket: number } & WritableTokenPosition, IHtmlSerializerConfig>
 {
-  constructor(
-  )
+  constructor()
   {
     super(defaultHtmlSerializerConfig);
   }

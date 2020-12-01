@@ -34,11 +34,8 @@ export function format(code: string, formatterConfig: Optional<IFormatterConfig>
     ...(formatterConfig ?? {})
   }
   
-  let result = null;
-  let errors: FormatError[];
   try
   {
-    //TODO: config
     let extended = extendAll(ast, code, cfg, comments);
     let state: IFormatState = {
       unit: 0,

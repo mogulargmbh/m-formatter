@@ -90,8 +90,6 @@ export const defaultFormatterConfig: IFormatterConfig = {
 }
 
 export var defaultTextSerializerConfig: ITextAstSerializerConfig = {
-  debugMode: false,
-  indentation: "  ",
   lineEnd: "\n",
   ws: " ",
 };
