@@ -9,7 +9,6 @@ import { BaseAstSerializer } from './BaseAstSerializer';
 import { IHtmlSerializerConfig } from '../config/definitions';
 import { defaultHtmlSerializerConfig } from '../config/default';
 import { ExtendedComment } from '../CommentExtension';
-import { Optional } from '../interfaces';
 
 export type literalClass = "string" | "list" | "boolean" | "number" | "null" | "record";
 export type operatorConstantClass = "operator" | "operator-keyword" | "operator-arithmetic" | "operator-equality" | "operator-logical" | "operator-relational" | "operator-unary" | "operator-keyword";
@@ -84,7 +83,7 @@ export class HtmlAstSerializer extends BaseAstSerializer<{ bracket: number } & W
     {
       for(let c of n.children)
       {
-        result += this.visit(c); 
+        result += this._serialize(c); 
       }
     }
     
@@ -97,6 +96,12 @@ export class HtmlAstSerializer extends BaseAstSerializer<{ bracket: number } & W
     result += this.closeSpan(n);
     
     return result;
+  }
+  
+  _serialize(node: ExtendedNode): string
+  {
+    let serialized = this.visit(node);
+    return serialized;
   }
   
   isWrapperNode(node: ExtendedNode)
@@ -137,8 +142,6 @@ export class HtmlAstSerializer extends BaseAstSerializer<{ bracket: number } & W
       attributes += `_id="${node._id}" _kind="${node.kind}" _ext="${node._ext}" _formatKind="${FormatNodeKind[node.formatKind]}" _range="${this.printRange(node.range)}" _formatCnt="${node._formatCnt}" _isBroken="${node.isBroken}" _wsBefore="${node.wsBefore}" _wsAfter="${node.wsAfter}" `;
       // attributes += `_state="${JSON.stringify(node.state).replace(/"/g, "'")}"`;
     }
-      
-    
     return `<span ${attributes}>`;
   }
   

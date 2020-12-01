@@ -1,6 +1,6 @@
 {
   "name": "@mogulargmbh/m-formatter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "./dist/main.js",
   "scripts": {
@@ -11,8 +11,8 @@
   },
   "author": "up@mogular.com",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/UliPlabst/m-formatter"
+    "type": "git",
+    "url": "https://github.com/UliPlabst/m-formatter"
   },
   "license": "MIT",
   "devDependencies": {
@@ -20,10 +20,10 @@
     "clipboardy": "^2.1.0",
     "typescript": "^4.0.3",
     "tslib": "^2.0.3",
-    "glob": "^7.1.6"
+    "glob": "^7.1.6",
+    "jsdom": "^16.2.2"
   },
   "dependencies": {
-    "jsdom": "^16.2.2",
     "@microsoft/powerquery-parser": "^0.2.8",
     "escape-html": "^1.0.3"
   }

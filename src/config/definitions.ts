@@ -50,10 +50,6 @@ export interface IHtmlSerializerConfig
   lineEnd: string;
   //Number of different bracket classes, default = 3. The formatter assigns bracket pairs the classes 'bracket' and 'bracket-{num}' where num = 1...{numBrackets}. You can then style your matching brackets with configurable depth.
   numBrackets: number;
-  //If null the formatter will put classes onto the resulting html but not styles (can be used for websites where you want to style the formatted html with css yourself). If non null the classes will be translated to inline styles on the html elements. See below for more information about the used classes.
-  inlineCss: string;
-  //Toggles inline css usage;
-  inlineCssToggle: boolean;
 }
 
 

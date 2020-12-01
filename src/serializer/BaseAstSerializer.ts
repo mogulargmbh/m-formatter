@@ -25,7 +25,7 @@ export abstract class BaseAstSerializer<T extends WritableTokenPosition, TConfig
     
   }
   
-  abstract visit(n: ExtendedNode): string;
+  abstract _serialize(n: ExtendedNode): string;
   
   getInitialState(): T
   {
@@ -42,7 +42,7 @@ export abstract class BaseAstSerializer<T extends WritableTokenPosition, TConfig
       ...this.defaultConfig,
       ...(config ?? {})
     }
-    return this.visit(ast);
+    return this._serialize(ast);
   }
   
   assertPosition(pos: WritableTokenPosition)

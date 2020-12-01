@@ -13,7 +13,6 @@ import { defaultHtmlSerializerConfig } from '../config/default';
 
 const serializer = new HtmlAstSerializer();
 
-
 export function runTests(cases: TestCase[]): number
 {
   let results = cases.map(c => runTestCase(c));
@@ -36,7 +35,7 @@ function runTestCase(c: TestCase): TestResult
     
     let start       = performance.now();
     let ast         = format(code, formatterConfig)
-    let result  = serializer.serialize(ast, htmlSerializerConfig);
+    let result      = serializer.serialize(ast, htmlSerializerConfig);
     let end         = performance.now();
     
     let el      = new jsdom.JSDOM(`<!DOCTYPE html>${result}`);
@@ -73,6 +72,85 @@ function runTestCase(c: TestCase): TestResult
   }
 }
 
+let defaultCss = `
+.constant.keyword {
+  color: #c586c0;
+}
+
+.constant.unknown-node {
+  color: red;
+}
+
+.constant {
+  color: #d4d4d4;
+}
+
+.comment {
+  color: #6A9955;
+}
+
+.identifier {
+  color: #9cdcfe;
+}
+
+.identifier.method-call {
+  color: #DCDCAA;
+}
+
+.operator {
+  color: #d4d4d4;
+}
+
+.operator.operator-dot {
+  color: #D4D4D4;
+}
+
+.operator.operator-keyword {
+  color: #569CD6;
+}
+
+.operator.operator-unary {
+  color: #569CD6;
+}
+
+.bracket {
+  font-weight: bold;
+}
+
+.bracket-0 {
+  color: Gold;
+}
+
+.bracket-1 {
+  color: GoldenRod;
+}
+
+.bracket-2 {
+  color: DarkGoldenRod;
+}
+
+.type {
+  color: #4ec9b0;
+}
+
+.literal.null {
+  color: #569cd6;
+}
+
+.literal.boolean {
+  color: #569cd6;
+}
+
+.literal.string {
+  color: #ce9178;
+}
+
+.literal {
+  color: #dcdcaa;
+}
+`
+
+
 function buildTestPage(results: TestResult[]): string
 {
   function *build()
@@ -87,7 +165,7 @@ function buildTestPage(results: TestResult[]): string
       font-family: "Lucida Console", Courier, monospace;
       white-space: pre;
     }
-    ${defaultHtmlSerializerConfig.inlineCss}
+    ${defaultCss}
     h3 {
       margin-top: 5px;
       margin-bottom: 5px;

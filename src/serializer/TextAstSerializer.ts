@@ -58,6 +58,11 @@ export class TextAstSerializer extends BaseAstSerializer<WritableTokenPosition, 
     return result;
   }
   
+  _serialize(n: ExtendedNode): string
+  {
+    return this.visit(n);
+  }
+  
   convertIndentation(code: string, ws: string, indentationLength: number, newIndentationString: string)
   {
     return code
