@@ -14,7 +14,7 @@ function *_formatInline(this: This): FormatGenerator
     inlineWsAfter: (n,i,l) => 1
   } as IArrayWrapperOpts);
   
-  s = this.subState(this.operators.range.end);
+  s = this.subState(this.operators.outerRange.end);
   yield this.typeExpression.format(s);
       
   return FormatResult.Ok;
@@ -29,7 +29,7 @@ function _formatBroken(this: This)
   });
   this.operators.format(this.subState(s));
   
-  s = this.subState(this.operators.range.end);
+  s = this.subState(this.operators.outerRange.end);
   this.typeExpression.format(this.subState(s));
   
   return FormatResult.Ok;

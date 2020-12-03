@@ -1,32 +1,87 @@
 import { Ast, TComment } from "./pq-ast";
 import { BinaryOperatorExpressionExtension, BracedArrayWrapperExtension, ConstantExtension, IdentifierExpressionExtension, IdentifierExtension, LiteralExpressionExtension, PairedExpressionExtension, UnaryExpressionExtension, ArrayWrapperExtension, LetExpressionExtension, CsvExtension, BracedWrapperExtension, BaseTypeExtension, PrimitiveTypeExtension, IfExpressionExtension, FunctionExpressionExtension, PairedConstantExtension, ErrorHandlingExpressionExtension, FieldSpecificationExtension, FieldTypeSpecificationExtension, FunctionTypeExtension, NotImplementedExpressionExtension, RecordTypeExtension, RecursivePrimaryExpressionExtension, SectionExtension, SectionMemberExtension, TableTypeExtension, ParameterExtension, RangeExpressionExtension, BracedWrapperOptionalExtension, FieldProjectionExtension, FieldSpecificationListExtension } from "./node-extensions/all";
 import { assertnever } from './Util';
-import { ExtendedNode, IPrivateNodeExtension, INodeExtensionBase } from './base/Base';
-import { IFormatterConfig } from './config/definitions';
+import { ExtendedNode, IPrivateNodeExtension, INodeExtensionBase, IEnumerable } from './base/Base';
 import { extendComment } from './CommentExtension';
 
-export function extendAll(node: Ast.INode, comments: TComment[], parent: ExtendedNode = null, previous: ExtendedNode = null): ExtendedNode
+function isExtendedNode(node: Ast.INode): node is ExtendedNode
+{
+  return (node as ExtendedNode).__extendedNode == true;
+}
+
+function *flatEnumerateAst(node: ExtendedNode): IEnumerable<ExtendedNode>
+{
+  yield node;
+  for(let c of node.children)
+  {
+    yield *flatEnumerateAst(c);
+  }
+}
+
+function getLeadingComments(node: ExtendedNode, comments: TComment[]): TComment[]
+{
+  let res = [];
+  for(let c of comments.slice())
+  {
+    if(node.tokenRange.positionStart.codeUnit >= c.positionEnd.codeUnit)
+    {
+      res.push(comments.splice(comments.indexOf(c), 1)[0]);
+    }
+  }
+  return res;
+}
+
+export function assignComments(ast: ExtendedNode, comments: TComment[])
+{
+  let nodes = Array.from(flatEnumerateAst(ast));
+  let lastNode: ExtendedNode = null;
+  let lastTakesCommentNode: ExtendedNode = null;
+  for(let n of flatEnumerateAst(ast))
+  {
+    n.prev = lastNode;
+    if(n.takesLeadingComments != false)
+    {
+      for(let c of getLeadingComments(n, comments))
+      {
+        if(lastNode && c.positionStart.lineNumber == lastNode.tokenRange.positionEnd.lineNumber)
+        {
+          let comment = extendComment(c, lastNode, "trail");
+          lastNode.trailingComments.push(comment);
+        }
+        else
+        {
+          let comment = extendComment(c, n, "prev");
+          n.leadingComments.push(comment);
+        }
+      }
+    }
+    
+    lastNode = n;
+    if(n.takesLeadingComments)
+      lastTakesCommentNode = n;
+  }
+  
+  for(let c of comments)
+  {
+    let comment = extendComment(c, lastNode, "trail");
+    lastNode.trailingComments.push(comment);
+  }
+}
+
+export function extendAll(node: Ast.INode, parent: ExtendedNode = null): ExtendedNode
 {
   if(isExtendedNode(node))
     return node; //TODO: the right way?? do I need to reinit the comments or not?
     
   let res = extend(node);
-  res.initialize(parent, previous, comments);
+  res.initialize(parent);
   let prev = res;
   for(let c of res.children)
   {
-    prev = extendAll(c, comments, res, prev);
+    prev = extendAll(c, res);
   }
   
-  if(parent == null) //root node
-    res.trailingComments = comments.map(c => extendComment(c, res, "trail"));
-  
   return res;
-}
-
-function isExtendedNode(node: Ast.INode): node is ExtendedNode
-{
-  return (node as ExtendedNode).__extendedNode == true;
 }
 
 export function extend(node: Ast.INode, parent: ExtendedNode = null): ExtendedNode

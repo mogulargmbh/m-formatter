@@ -12,16 +12,16 @@ function *_formatInline(this: This): FormatGenerator
   let s = this.subState();
   yield this.parameters.format(s);
   
-  s = this.subState(this.parameters.range.end);
+  s = this.subState(this.parameters.outerRange.end);
   if(this.maybeFunctionReturnType)
   {
     yield this.maybeFunctionReturnType.format(s)
-    s = this.subState(this.maybeFunctionReturnType.range.end);
+    s = this.subState(this.maybeFunctionReturnType.outerRange.end);
   }
   
   yield this.fatArrowConstant.format(s, 1, 1);
   
-  s = this.subState(this.fatArrowConstant.range.end);
+  s = this.subState(this.fatArrowConstant.outerRange.end);
   yield this.expression.format(s)
   
   return FormatResult.Ok;
@@ -32,17 +32,17 @@ function _formatBroken(this: This): FormatResult
   let s = this.subState();
   this.parameters.format(s);
   
-  s = this.subState(this.parameters.range.end);
+  s = this.subState(this.parameters.outerRange.end);
   if(this.maybeFunctionReturnType)
   {
     this.maybeFunctionReturnType.format(s);
-    s = this.subState(this.maybeFunctionReturnType.range.end);
+    s = this.subState(this.maybeFunctionReturnType.outerRange.end);
   }
   
   this.fatArrowConstant.format(s, 1, 0);
   
   s = this.subState({
-    line: this.fatArrowConstant.range.end.line + 1,
+    line: this.fatArrowConstant.outerRange.end.line + 1,
     unit: this.nextIndentUnit(),
     indent: this.state.indent + 1,
     suppressInitialLineBreak: true

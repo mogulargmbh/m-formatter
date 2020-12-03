@@ -9,7 +9,7 @@ type This = PrivateNode<Ast.NotImplementedExpression>;
 function *_formatInline(this: This): FormatGenerator
 {
   yield this.ellipsisConstant.format(this.subState());
-  this.setRangeEnd(this.ellipsisConstant);
+  this.setInnerRangeEnd(this.ellipsisConstant);
   return FormatResult.Ok;
 }
 

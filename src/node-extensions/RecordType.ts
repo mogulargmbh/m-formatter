@@ -12,7 +12,7 @@ function *_formatInline(this: This): FormatGenerator
   let s = this.subState();
   yield this.fields.format(s);
     
-  this.setRangeEnd(this.fields);
+  this.setInnerRangeEnd(this.fields);
   return FormatResult.Ok;
 }
 

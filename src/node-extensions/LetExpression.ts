@@ -34,7 +34,7 @@ function _formatBroken(this: This): FormatResult
     suppressInitialLineBreak: true
   }));
   
-  line = this.variableList.range.end.line + 1;
+  line = this.variableList.outerRange.end.line + 1;
   
   this.inConstant.format(this.subState({
     line: line,

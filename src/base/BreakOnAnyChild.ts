@@ -5,13 +5,13 @@ import { IFormatterConfig } from '../config/definitions';
 export function format(this: PrivateExtendedNode, state: IFormatState, wsBefore: number = null, wsAfter: number = null, opts = null): FormatResult
 {
   this.initFormat(state, wsBefore, wsAfter, opts);
-  this.setRangeStart();
+  this.setOuterRangeStart();
   
   let [res, s] = this.formatLeadingComments();
   this.state = s;
   if(res == FormatResult.Break && this.state.stopOnLineBreak == true)
     return FormatResult.Break;
-  this.setRangeStart();
+  this.setInnerRangeStart(s);
     
   
   if(this.state.forceLineBreak != true)
@@ -35,14 +35,17 @@ export function format(this: PrivateExtendedNode, state: IFormatState, wsBefore:
     res = this._formatBroken();
   }
   
-  this.setRangeEnd(this.lastChild() ?? this.state);
+  let endCursor = this.lastChild() ?? this.state;
+  this.setInnerRangeEnd(endCursor);
   
   if(this.trailingComments?.any())
   {
     let [res2, s2] = this.formatTrailingComments();
+    endCursor = s2;
     if(res2 == FormatResult.Break && this.state.stopOnLineBreak)
       return FormatResult.Break;
   }
+  this.setOuterRangeEnd(endCursor);
   
   this.finishFormat();
   return res;

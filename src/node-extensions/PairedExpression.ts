@@ -16,18 +16,21 @@ type This = PrivateNode<PairedExpression, PairedExpressionOpts>;
 
 function *_formatInline(this: This): FormatGenerator
 {
-  yield this.key.format(this.subState());
+  let s = this.subState();
+  yield this.key.format(s);
   
+  s = this.subState(this.key.outerRange.end);
   if(this.opts.alignKeys != null)
   {
-    yield this.equalConstant.format(this.subState(this.key.range.end), this.opts.alignKeys - this.key.literal.length + 1, 1); 
+    yield this.equalConstant.format(s, this.opts.alignKeys - this.key.literal.length + 1, 1); 
   }
   else
   {
-    yield this.equalConstant.format(this.subState(this.key.range.end), 1, 1);
+    yield this.equalConstant.format(s, 1, 1);
   }
   
-  yield this.value.format(this.subState(this.equalConstant.range.end));
+  s = this.subState(this.equalConstant.outerRange.end);
+  yield this.value.format(this.subState(s));
     
   return FormatResult.Ok;
 }
@@ -41,7 +44,7 @@ function _formatBroken(this: This)
     line: this.state.line + 1
   }), 0, 1);
   
-  this.value.format(this.subState(this.equalConstant.range.end)); //No need for notify break as this node is breaking hence when state.notifyBreak is true this._formatBroken would nevre be called!
+  this.value.format(this.subState(this.equalConstant.outerRange.end)); //No need for notify break as this node is breaking hence when state.notifyBreak is true this._formatBroken would nevre be called!
   
   return FormatResult.Ok;
 }

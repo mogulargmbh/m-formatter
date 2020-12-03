@@ -16,10 +16,10 @@ function *_formatInline(this: This): FormatGenerator
 {
   yield this.openWrapperConstant.format(this.subState());
   
-  let s = this.subState(this.openWrapperConstant.range.end);
+  let s = this.subState(this.openWrapperConstant.outerRange.end);
   yield this.content.format(s);
   
-  s = this.subState(this.content.range.end);
+  s = this.subState(this.content.outerRange.end);
   yield this.closeWrapperConstant.format(s);
     
   return FormatResult.Ok;
@@ -39,7 +39,7 @@ function _formatBroken(this: This)
   this.content.format(s);
   
   this.closeWrapperConstant.format(this.subState({
-    line: this.content.range.end.line + 1,
+    line: this.content.outerRange.end.line + 1,
     unit: this.currIndentUnit(),
     indent: this.state.indent
   }));

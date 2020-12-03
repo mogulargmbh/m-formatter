@@ -4,11 +4,11 @@ import { FormatResult, IFormatState, PrivateExtendedNode, NodeExtensionBase, IBa
 export function format(this: PrivateExtendedNode, state: IFormatState, wsBefore: number = null, wsAfter: number = null, opts): FormatResult
 {
   this.initFormat(state, wsBefore, wsAfter, opts);
-  this.setRangeStart(); 
+  this.setOuterRangeStart(); 
   
   let [res, s] = this.formatLeadingComments();
   this.state = s;
-  this.setRangeStart();
+  this.setInnerRangeStart(s);
 
   if(res == FormatResult.Break && this.state.stopOnLineBreak)
     return FormatResult.Break;
@@ -20,14 +20,17 @@ export function format(this: PrivateExtendedNode, state: IFormatState, wsBefore:
   
   res = this._formatBroken();
   
-  this.setRangeEnd(this.children?.last() ?? this.state);
+  let endCursor = this.lastChild() ?? this.state;
+  this.setInnerRangeEnd(endCursor);
   
   if(this.trailingComments?.any())
   {
     let [res2, s2] = this.formatTrailingComments();
+    endCursor = s2;
     if(res2 == FormatResult.Break && this.state.stopOnLineBreak)
       return FormatResult.Break;
   }
+  this.setOuterRangeEnd(endCursor);
   
   this.finishFormat();
   return FormatResult.Ok;

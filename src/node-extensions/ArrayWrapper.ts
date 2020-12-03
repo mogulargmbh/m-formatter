@@ -66,8 +66,8 @@ function *_formatInline(this: This): FormatGenerator
     });
     yield c.format(s, this.opts.inlineWsBefore(c,i,this.elements.length), this.opts.inlineWsAfter(c,i,this.elements.length));
       
-    line = c.range.end.line;
-    unit = c.range.end.unit;
+    line = c.outerRange.end.line;
+    unit = c.outerRange.end.unit;
     i++;
   }
   
@@ -85,10 +85,10 @@ function formatElements(node: This, opts: any, line: number, indent: number, uni
       suppressInitialLineBreak: true
     });
     let res = c.format(s, null, null, opts);
-    if(c.range.end.line != line && breakOnNewline == true)
+    if(c.outerRange.end.line != line && breakOnNewline == true)
       return false;
       
-    line = c.range.end.line + 1;
+    line = c.outerRange.end.line + 1;
   }
   return true;
 }

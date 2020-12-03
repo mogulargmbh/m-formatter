@@ -12,9 +12,9 @@ function *_formatInline(this: This): FormatGenerator
 {
   yield this.left.format(this.subState());
       
-  yield this.rangeConstant.format(this.subState(this.left.range.end), 1, 1);
+  yield this.rangeConstant.format(this.subState(this.left.outerRange.end), 1, 1);
   
-  yield this.right.format(this.subState(this.rangeConstant.range.end));
+  yield this.right.format(this.subState(this.rangeConstant.outerRange.end));
     
   return FormatResult.Ok;
 }
@@ -29,7 +29,7 @@ function _formatBroken(this: This)
     line: this.state.line + 1
   }), 0, 1);
   
-  this.right.format(this.subState(this.rangeConstant.range.end)); //No need for notify break as this node is breaking hence when state.notifyBreak is true this._formatBroken would nevre be called!
+  this.right.format(this.subState(this.rangeConstant.outerRange.end)); //No need for notify break as this node is breaking hence when state.notifyBreak is true this._formatBroken would nevre be called!
   
   return FormatResult.Ok;
 }

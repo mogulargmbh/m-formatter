@@ -8,7 +8,8 @@ type This = PrivateNode<Ast.LiteralExpression>;
 function *_formatInline(this: This): FormatGenerator
 {
   let end = this.state.unit + this.literal.length + this.wsBefore;
-  this.setRangeEnd({
+  this.setInnerRangeEnd({
+    line: this.state.line,
     unit: end
   });
   return end <= this.config.lineWidth ? FormatResult.Ok : FormatResult.ExceedsLine;

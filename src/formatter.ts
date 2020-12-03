@@ -1,6 +1,6 @@
 import { Task, DefaultSettings, ResultKind, Parser } from '@microsoft/powerquery-parser';
 import { FormatError } from './Error';
-import { extendAll } from './Factory';
+import { extendAll, assignComments } from './Factory';
 import { Ast } from '@microsoft/powerquery-parser/lib/language';
 import { Optional } from './interfaces';
 import { IFormatterConfig } from './config/definitions';
@@ -55,7 +55,8 @@ export function extendAndFormat(ast: Ast.INode, comments: TComment[], formatterC
 {
   try 
   {
-    let extended = extendAll(ast, comments);
+    let extended = extendAll(ast);
+    assignComments(extended, comments);
     return format(extended, formatterConfig);
   } 
   catch (error) 

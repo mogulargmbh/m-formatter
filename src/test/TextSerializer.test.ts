@@ -1,6 +1,6 @@
 import { performance } from 'perf_hooks';
 import { Optional } from '../interfaces';
-import { IFormatterConfig, IHtmlAstSerializerConfig } from '../config/definitions';
+import { IFormatterConfig, IHtmlAstSerializerConfig, ITextAstSerializerConfig } from '../config/definitions';
 import { TextAstSerializer } from '../serializer/TextAstSerializer';
 import { TestCase, TestError, TestResult } from './common';
 import * as fs from 'fs';
@@ -33,14 +33,13 @@ export function runTestCase(c: TestCase): TestResult
     console.log(`Running TextSerializer test ${identifier}`);
     let formatterConfig: Optional<IFormatterConfig> = {
     };
-    let htmlSerializerConfig: Optional<IHtmlAstSerializerConfig> = {
-      debugMode: true
+    let textSerializerConfig: Optional<ITextAstSerializerConfig> = {
     };
     
     let start              = performance.now();
     let [parsed, comments] = parse(code);
     let ast                = extendAndFormat(parsed, comments, formatterConfig);
-    let result             = serializer.serialize(ast, htmlSerializerConfig);
+    let result             = serializer.serialize(ast, textSerializerConfig);
     let end                = performance.now();
     
     //Check if textContent == code (ignore all whitespace)
@@ -55,7 +54,7 @@ export function runTestCase(c: TestCase): TestResult
     }
     catch(error)
     {
-      throw new TestError("Cannot reparse text result", identifier, null, is, should);
+      throw new TestError("Cannot reparse text result", identifier, null, result, null);
     }
     
     
@@ -65,20 +64,18 @@ export function runTestCase(c: TestCase): TestResult
       throw new TestError("Converted tab indentation text result does not match source", identifier, null, is, should);
     try
     {
-      parse(result); //check if result can be parsed
+      parse(converted); //check if result can be parsed
     }
     catch(error)
     {
-      throw new TestError("Cannot reparse converted tab indentation text result", identifier, null, is, should);
+      throw new TestError("Cannot reparse converted tab indentation text result", identifier, null, converted, null);
     }
     
-    let formatted2 = extendAndFormat(ast, comments.slice(), formatterConfig)
-    let result2 = serializer.serialize(formatted2, htmlSerializerConfig);
+    let formatted2 = format(ast, formatterConfig)
+    let result2 = serializer.serialize(formatted2, textSerializerConfig);
     if(result != result2)
-      throw new TestError("Second format pass yielded different result", identifier, null, is, should);
+      throw new TestError("Second format pass yielded different result", identifier, null, result2, result);
     
-    fs.writeFileSync("./debug.pq", result);
-    fs.writeFileSync("./debug2.pq", result2);
     console.log(`-- success in ${end-start}ms`);
     return {
       result,
@@ -88,6 +85,8 @@ export function runTestCase(c: TestCase): TestResult
   catch(err)
   {
     console.error(err.message);
+    if(err instanceof TestError)
+      err.writeErrorFiles();
     return {
       error: err,
       case: c

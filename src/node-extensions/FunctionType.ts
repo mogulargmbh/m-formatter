@@ -9,21 +9,21 @@ type This = ExtendedNode<NodeType>;
 
 function *_formatInline(this: This): FormatGenerator
 {
-  this.setRangeStart();
+  this.setOuterRangeStart();
   
   let s = this.subState();
   yield this.functionConstant.format(s, 0, 1);
   
-  let end = this.functionConstant.range.end;
+  let end = this.functionConstant.outerRange.end;
   if(this.parameters)
   {
     yield this.parameters.format(this.subState(end));
-    end = this.parameters.range.end;
+    end = this.parameters.outerRange.end;
   }
   
   yield this.functionReturnType.format(this.subState(end));
     
-  this.setRangeEnd(this.functionReturnType);
+  this.setInnerRangeEnd(this.functionReturnType);
   return FormatResult.Ok;
 }
 

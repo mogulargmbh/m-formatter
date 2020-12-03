@@ -8,10 +8,12 @@ type This = ExtendedNode<Ast.Identifier | Ast.GeneralizedIdentifier>;
 
 function *_formatInline(this: This): FormatGenerator
 {
-  this.setRangeEnd({
-    unit: this.state.unit + this.literal.length
+  let end = this.state.unit + this.literal.length;
+  this.setInnerRangeEnd({
+    line: this.state.line,
+    unit: end
   });
-  let res =  this.range.end.unit > this.config.lineWidth  == true ? FormatResult.ExceedsLine : FormatResult.Ok;
+  let res = end > this.config.lineWidth ? FormatResult.ExceedsLine : FormatResult.Ok;
   return res;
 }
 

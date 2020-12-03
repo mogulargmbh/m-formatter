@@ -5,11 +5,11 @@ import { IFormatterConfig } from '../config/definitions';
 function format(this: PrivateExtendedNode, state: IFormatState, wsBefore: number = null, wsAfter: number = null, opts = null): FormatResult
 {
   this.initFormat(state, wsBefore, wsAfter, opts);
-  this.setRangeStart();
+  this.setOuterRangeStart();
   
   let [res, s] = this.formatLeadingComments();
   this.state = s;
-  this.setRangeStart();
+  this.setInnerRangeStart(s);
   
   if(res == FormatResult.Break && this.state.stopOnLineBreak)
     return FormatResult.Break;
@@ -24,18 +24,22 @@ function format(this: PrivateExtendedNode, state: IFormatState, wsBefore: number
   }
   
   //No set range call -> check if forgotten
-  if(this.range.end.line == null)
+  if(this.innerRange.end.line == null || this.innerRange.end.unit == null)
     throw new Error(`Forgot set range call for ${this._ext}`);
   
+  let endCursor = this.innerRange.end;
   if(this.trailingComments?.any())
   {
     let [res2, s2] = this.formatTrailingComments();
+    endCursor = s2;
     if(res2 == FormatResult.Break && this.state.stopOnLineBreak)
       return FormatResult.Break;
   }
+  this.setOuterRangeEnd(endCursor);
+
   
   this.finishFormat();
-  return this.range.end.unit <= this.config.lineWidth ? FormatResult.Ok : FormatResult.ExceedsLine;
+  return this.outerRange.end.unit <= this.config.lineWidth ? FormatResult.Ok : FormatResult.ExceedsLine;
 }
 
 export const AlwaysInlineNodeBase: IBaseNode = {

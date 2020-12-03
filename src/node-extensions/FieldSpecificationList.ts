@@ -10,15 +10,15 @@ function *_formatInline(this: This): FormatGenerator
 {
   yield this.openWrapperConstant.format(this.subState());
   
-  let s = this.subState(this.openWrapperConstant.range.end);
+  let s = this.subState(this.openWrapperConstant.outerRange.end);
   yield this.content.format(s);
   
-  s = this.subState(this.content.range.end);
+  s = this.subState(this.content.outerRange.end);
   if(this.maybeOpenRecordMarkerConstant)
   {
     s.unit += 1;
     yield this.maybeOpenRecordMarkerConstant.format(s)
-    s = this.subState(this.maybeOpenRecordMarkerConstant.range.end);
+    s = this.subState(this.maybeOpenRecordMarkerConstant.outerRange.end);
   }
   
   yield this.closeWrapperConstant.format(s);
@@ -40,17 +40,17 @@ function _formatBroken(this: This)
   
   this.content.format(s);
   
-  let line = this.content.range.end.line;
+  let line = this.content.outerRange.end.line;
   if(this.maybeOpenRecordMarkerConstant)
   {
     this.maybeOpenRecordMarkerConstant.format(
       this.subState({
-        line: this.content.range.end.line + 1,
+        line: this.content.outerRange.end.line + 1,
         unit: this.nextIndentUnit(),
         indent: this.state.indent + 1
       })
     );
-    line = this.maybeOpenRecordMarkerConstant.range.end.line;
+    line = this.maybeOpenRecordMarkerConstant.outerRange.end.line;
   }
   
   this.closeWrapperConstant.format(this.subState({

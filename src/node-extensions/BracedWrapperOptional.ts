@@ -14,15 +14,15 @@ function *_formatInline(this: This): FormatGenerator
 {
   yield this.openWrapperConstant.format(this.subState());
   
-  let s = this.subState(this.openWrapperConstant.range.end);
+  let s = this.subState(this.openWrapperConstant.outerRange.end);
   yield this.content.format(s);
   
-  s = this.subState(this.content.range.end);
+  s = this.subState(this.content.outerRange.end);
   yield this.closeWrapperConstant.format(s);
   
   if(this.maybeOptionalConstant)
   {
-    s = this.subState(this.closeWrapperConstant.range.end);
+    s = this.subState(this.closeWrapperConstant.outerRange.end);
     yield this.maybeOptionalConstant.format(s);
   }
     
@@ -42,7 +42,7 @@ function _formatBroken(this: This): FormatResult
   this.content.format(s);
   
   s = this.subState({
-    line: this.content.range.end.line + 1,
+    line: this.content.outerRange.end.line + 1,
     unit: this.currIndentUnit(),
     indent: this.state.indent
   });
@@ -50,7 +50,7 @@ function _formatBroken(this: This): FormatResult
   
   if(this.maybeOptionalConstant)
   {
-    s = this.subState(this.closeWrapperConstant.range.end);
+    s = this.subState(this.closeWrapperConstant.outerRange.end);
     this.maybeOptionalConstant.format(s);
   }
   

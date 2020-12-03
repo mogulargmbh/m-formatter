@@ -1,8 +1,7 @@
 import { IFormatterConfig } from './config/definitions';
-import { TComment } from './pq-ast';
-import { ExtendedNode, Range, IFormatState, FormatResult } from './base/Base';
+import { CommentKind, TComment } from './pq-ast';
+import { ExtendedNode, Range, IFormatState, FormatResult, IEnumerable } from './base/Base';
 import { assertnever, spliteByLineEnd as splitByNewline } from './Util';
-import { CommentKind } from '@microsoft/powerquery-parser/lib/language/comment';
 
 type ICommentExtensionBase = {
   trailingNewLine: boolean,
@@ -102,10 +101,10 @@ const CommentExtensionBase: ICommentExtensionBase = {
         }
         
         this.range.end = {
-          line: line,
+          line,
           unit: unit + this.data.length
         }
-        return FormatResult.Break;
+        return this.kind == CommentKind.Line ? FormatResult.Break : FormatResult.Ok;
       }
       case "prev":
       {

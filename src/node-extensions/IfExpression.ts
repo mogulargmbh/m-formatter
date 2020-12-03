@@ -11,19 +11,19 @@ function *_formatInline(this: This): FormatGenerator
   let s = this.subState();
   yield this.ifConstant.format(s, 0, 1);
   
-  s = this.subState(this.ifConstant.range.end);
+  s = this.subState(this.ifConstant.outerRange.end);
   yield this.condition.format(s);
   
-  s = this.subState(this.condition.range.end);
+  s = this.subState(this.condition.outerRange.end);
   yield this.thenConstant.format(s, 1, 1);
   
-  s = this.subState(this.thenConstant.range.end);
+  s = this.subState(this.thenConstant.outerRange.end);
   yield this.trueExpression.format(s);
   
-  s = this.subState(this.trueExpression.range.end);
+  s = this.subState(this.trueExpression.outerRange.end);
   yield this.elseConstant.format(s, 1, 1);
   
-  s = this.subState(this.elseConstant.range.end);
+  s = this.subState(this.elseConstant.outerRange.end);
   yield this.falseExpression.format(s);
   
   return FormatResult.Ok;
@@ -31,7 +31,7 @@ function *_formatInline(this: This): FormatGenerator
 
 function _formatBroken(this: This): FormatResult
 {
-  this.setRangeStart();
+  this.setOuterRangeStart();
   
   let { line, unit, indent } = this.state;
   let s = this.subState();
@@ -52,21 +52,24 @@ function _formatBroken(this: This): FormatResult
     unit = this.nextIndentUnit();
   }
   
-  s = this.subState(this.ifConstant.range.end);
+  s = this.subState({
+    ...this.ifConstant.outerRange.end,
+    indent: indent + 1
+  });
   this.condition.format(s);
   
-  s = this.subState(this.condition.range.end);
+  s = this.subState(this.condition.outerRange.end);
   this.thenConstant.format(s, 1, 0);
   
   s = this.subState({
-    line: this.thenConstant.range.end.line + 1,
+    line: this.thenConstant.outerRange.end.line + 1,
     indent: indent + 1,
     unit: this.indentUnit(indent + 1)
   });
   this.trueExpression.format(s);
   
   s = this.subState({
-    line: this.trueExpression.range.end.line + 1,
+    line: this.trueExpression.outerRange.end.line + 1,
     unit: this.indentUnit(indent)
   });
   this.elseConstant.format(s);
@@ -74,7 +77,7 @@ function _formatBroken(this: This): FormatResult
   if(this.falseExpression.kind == Ast.NodeKind.IfExpression)
   {
     s = this.subState({
-      ...this.elseConstant.range.end,
+      ...this.elseConstant.outerRange.end,
       suppressInitialLineBreak: true,
       indent: indent,
     });
@@ -83,7 +86,7 @@ function _formatBroken(this: This): FormatResult
   else
   {
     s = this.subState({
-      line: this.elseConstant.range.end.line + 1,
+      line: this.elseConstant.outerRange.end.line + 1,
       indent: indent + 1,
       unit: this.indentUnit(indent + 1),
       suppressInitialLineBreak: true
@@ -91,7 +94,7 @@ function _formatBroken(this: This): FormatResult
   }
   this.falseExpression.format(s);
   
-  this.setRangeEnd(this.falseExpression);
+  this.setOuterRangeEnd(this.falseExpression);
   return FormatResult.Ok;
 }
 

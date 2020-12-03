@@ -11,15 +11,24 @@ export type TestCase =
 
 export class TestError extends Error
 {
+  static ErrorDir =  "./test-errors"
   constructor(
     message: string,
-    private identifier: string,
-    private innerError: any = null,
-    private result: string = null,
-    private expected: string = null
+    public identifier: string,
+    public innerError: any = null,
+    public result: string = null,
+    public expected: string = null
   )
   {
     super(message);
+  }
+  
+  writeErrorFiles()
+  {
+    if(this.result != null)
+      fs.writeFileSync(path.join(TestError.ErrorDir, `${this.identifier}_result.txt`), this.result)
+    if(this.expected != null)
+      fs.writeFileSync(path.join(TestError.ErrorDir, `${this.identifier}_expected.txt`), this.expected)
   }
 }
 

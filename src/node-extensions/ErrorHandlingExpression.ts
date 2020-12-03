@@ -12,12 +12,12 @@ function *_formatInline(this: This): FormatGenerator
   let s = this.subState();
   yield this.tryConstant.format(s, 0, 1);
   
-  s = this.subState(this.tryConstant.range.end);
+  s = this.subState(this.tryConstant.outerRange.end);
   yield this.protectedExpression.format(s);
     
   if(this.maybeOtherwiseExpression)
   {
-    s = this.subState(this.protectedExpression.range.end);
+    s = this.subState(this.protectedExpression.outerRange.end);
     yield this.maybeOtherwiseExpression.format(s, 1, 0);
   }
   
@@ -52,7 +52,7 @@ function _formatBroken(this: This): FormatResult
   if(this.maybeOtherwiseExpression)
   {
     let s = this.subState({
-      line: this.protectedExpression.range.end.line + 1,
+      line: this.protectedExpression.outerRange.end.line + 1,
       indent: this.state.indent,
       unit: this.currIndentUnit(),
       forceLineBreak: true

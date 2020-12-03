@@ -12,10 +12,10 @@ function *_formatInline(this: This): FormatGenerator
   if(this.maybeInclusiveConstant)
   {
     yield this.maybeInclusiveConstant.format(this.subState());
-    end = this.subState(this.maybeInclusiveConstant.range.end);
+    end = this.subState(this.maybeInclusiveConstant.outerRange.end);
   }
   yield this.identifier.format(end);
-  this.setRangeEnd(this.identifier);
+  this.setInnerRangeEnd(this.identifier);
 }
 
 function *_children(this: This)

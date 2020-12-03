@@ -21,7 +21,7 @@ function *_formatInline(this: This): FormatGenerator
       
     yield this.maybeLiteralAttributes.format(s);
     s = this.subState({
-      line: this.maybeLiteralAttributes.range.end.line + 1,
+      line: this.maybeLiteralAttributes.outerRange.end.line + 1,
       unit: this.currIndentUnit()
     });
   }
@@ -29,15 +29,15 @@ function *_formatInline(this: This): FormatGenerator
   if(this.maybeSharedConstant)
   {
     yield this.maybeSharedConstant.format(s, 0, 1);
-    s = this.subState(this.maybeSharedConstant.range.end);
+    s = this.subState(this.maybeSharedConstant.outerRange.end);
   }
   
   yield this.namePairedExpression.format(s);
   
-  s = this.subState(this.namePairedExpression.range.end);
+  s = this.subState(this.namePairedExpression.outerRange.end);
   yield this.semicolonConstant.format(s);
   
-  this.setRangeEnd(this.semicolonConstant);
+  this.setInnerRangeEnd(this.semicolonConstant);
   return FormatResult.Ok;
 }
 

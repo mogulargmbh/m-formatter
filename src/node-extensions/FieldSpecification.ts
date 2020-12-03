@@ -13,12 +13,12 @@ function *_formatInline(this: This): FormatGenerator
   let s = this.subState();
   yield this.name.format(s);
   
-  let end = this.name.range.end;
+  let end = this.name.outerRange.end;
   if(this.maybeOptionalConstant)
   {
-    s = this.subState(this.name.range.end);
+    s = this.subState(this.name.outerRange.end);
     yield this.maybeOptionalConstant.format(s)
-    end = this.maybeOptionalConstant.range.end;
+    end = this.maybeOptionalConstant.outerRange.end;
   }
   if(this.maybeFieldTypeSpecification)
   {
@@ -26,7 +26,7 @@ function *_formatInline(this: This): FormatGenerator
     yield this.maybeFieldTypeSpecification.format(s);
   }
   
-  this.setRangeEnd(this.lastChild())
+  this.setInnerRangeEnd(this.lastChild())
   return FormatResult.Ok;
 }
 

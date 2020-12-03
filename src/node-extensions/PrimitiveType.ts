@@ -9,10 +9,12 @@ type This = PrivateNode<Ast.PrimitiveType>;
 
 function *_formatInline(this: This): FormatGenerator
 {
-  this.setRangeEnd({
-    unit: this.state.unit + this.primitiveTypeKind.length
+  let end = this.state.unit + this.primitiveTypeKind.length;
+  this.setInnerRangeEnd({
+    line: this.state.line,
+    unit: end
   });
-  return FormatResult.Ok;
+  return end > this.config.lineWidth ? FormatResult.ExceedsLine : FormatResult.Ok;
 }
 
 function getContentString(this: This)

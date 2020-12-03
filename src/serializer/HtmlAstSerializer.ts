@@ -297,7 +297,7 @@ export class HtmlAstSerializer extends BaseAstSerializer<{ bracket: number } & W
       
     if(this.config.debugMode)
     {
-      attributes += `_id="${node._id}" _kind="${node.kind}" _ext="${node._ext}" _formatKind="${FormatNodeKind[node.formatKind]}" _range="${this.printRange(node.range)}" _formatCnt="${node._formatCnt}" _isBroken="${node.isBroken}" _wsBefore="${node.wsBefore}" _wsAfter="${node.wsAfter}" `;
+      attributes += `_id="${node._id}" _kind="${node.kind}" _ext="${node._ext}" _formatKind="${FormatNodeKind[node.formatKind]}" _innerRange="${this.printRange(node.innerRange)}" _outerRange="${this.printRange(node.outerRange)}" _formatCnt="${node._formatCnt}" _isBroken="${node.isBroken}" _wsBefore="${node.wsBefore}" _wsAfter="${node.wsAfter}" `;
       // attributes += `_state="${JSON.stringify(node.state).replace(/"/g, "'")}"`;
     }
     return `<span ${attributes}>`;

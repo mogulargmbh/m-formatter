@@ -13,10 +13,10 @@ function *_formatInline(this: This): FormatGenerator
   let s = this.subState();
   yield this.equalConstant.format(s, 1, 1);
   
-  s = this.subState(this.equalConstant.range.end);
+  s = this.subState(this.equalConstant.outerRange.end);
   yield this.fieldType.format(s);
     
-  this.setRangeEnd(this.fieldType);
+  this.setInnerRangeEnd(this.fieldType);
   return FormatResult.Ok;
 }
 

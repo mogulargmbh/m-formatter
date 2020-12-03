@@ -18,11 +18,11 @@ function *_formatInline(this: This): FormatGenerator
     
   if(this.maybeCommaConstant)
   {
-    s = this.subState(this.node.range.end);
+    s = this.subState(this.node.outerRange.end);
     yield this.maybeCommaConstant.format(s);
   }
   
-  this.setRangeEnd(this.lastChild());
+  this.setInnerRangeEnd(this.lastChild());
   return FormatResult.Ok;
 }
 

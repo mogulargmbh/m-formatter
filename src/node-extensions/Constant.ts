@@ -7,10 +7,12 @@ type This = PrivateNode<TConstant>;
 
 function *_formatInline(this: This): FormatGenerator
 {
-  this.setRangeEnd({
-    unit: this.state.unit + this.constantKind.length + this.wsBefore
+  let end = this.state.unit + this.constantKind.length + this.wsBefore;
+  this.setInnerRangeEnd({
+    line: this.state.line,
+    unit: end
   });
-  return this.range.end.unit > this.config.lineWidth ? FormatResult.ExceedsLine : FormatResult.Ok;
+  return end > this.config.lineWidth ? FormatResult.ExceedsLine : FormatResult.Ok;
 }
 
 function getContentString(this: This)

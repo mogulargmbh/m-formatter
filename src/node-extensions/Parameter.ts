@@ -13,18 +13,18 @@ function *_formatInline(this: This): FormatGenerator
   if(this.maybeOptionalConstant)
   {
     yield this.maybeOptionalConstant.format(s, 0, 1);
-    s = this.subState(this.maybeOptionalConstant.range.end);
+    s = this.subState(this.maybeOptionalConstant.outerRange.end);
   }
   
   yield this.name.format(s);
   
   if(this.maybeParameterType)
   {
-    s = this.subState(this.name.range.end);
+    s = this.subState(this.name.outerRange.end);
     yield this.maybeParameterType.format(s)
   }
     
-  this.setRangeEnd(this.lastChild());
+  this.setInnerRangeEnd(this.lastChild());
   return FormatResult.Ok;
 }
 

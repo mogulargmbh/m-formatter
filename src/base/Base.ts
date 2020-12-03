@@ -1,7 +1,7 @@
 import { Ast } from "../pq-ast";
 import { Optional } from '../interfaces';
 import { IFormatterConfig } from '../config/definitions';
-import { TComment } from '@microsoft/powerquery-parser/lib/language/comment';
+import { CommentKind, TComment } from '@microsoft/powerquery-parser/lib/language/comment';
 import { ExtendedComment, extendComment } from '../CommentExtension';
 import { defaultFormatterConfig } from '../config/default';
 
@@ -70,10 +70,11 @@ export interface INodeExtensionBase
   state: IFormatState;
   wsBefore: number;
   wsAfter: number;
-  range: Range;
+  outerRange: Range;
+  innerRange: Range;
   children: PublicExtendedNode[];
   config: IFormatterConfig,
-  initialize: (parent: ExtendedNode, prev: ExtendedNode, comments: TComment[]) => void;
+  initialize: (parent: ExtendedNode) => void;
   hasContentString: () => boolean;
   subState: (state?: OptionalFormatState) => IFormatState;
   nextIndentUnit: () => number;
@@ -81,8 +82,10 @@ export interface INodeExtensionBase
   indentUnit: (number) => number;
   anyChildBroken: () => boolean;
   // inlineLength(): number;
-  setRangeStart: (state?: Optional<Cursor> | ExtendedNode) => void;
-  setRangeEnd: (state: Optional<Cursor> | ExtendedNode) => void;  
+  setOuterRangeStart: (state?: Optional<Cursor> | ExtendedNode) => void;
+  setOuterRangeEnd: (state: Optional<Cursor> | ExtendedNode) => void;  
+  setInnerRangeStart: (cursor:  Optional<Cursor> | ExtendedNode) => void;
+  setInnerRangeEnd: (cursor:  Optional<Cursor> | ExtendedNode)  => void;
   exceedsLineLength: (line: number) => boolean;
   updateTokenRange: () => void;
   lastChild: () => PublicExtendedNode;
@@ -186,20 +189,20 @@ export const NodeExtensionBase: INodeExtensionBase =
   isBroken: false,
   wsBefore: null,
   wsAfter: null,
-  range: null,
+  outerRange: null,
+  innerRange: null,
   children: [],
   config: defaultFormatterConfig,
   leadingComments: null,
   trailingComments: null,
-  initialize: function(this: PrivateExtendedNode, parent: ExtendedNode, prev: ExtendedNode, comments: TComment[]) {
+  initialize: function(this: PrivateExtendedNode, parent: ExtendedNode) {
     this._id              = NodeCounter;
     NodeCounter++;
     this.parent           = parent;
-    this.prev             = prev;
     this.leadingComments  = [];
     this.trailingComments = [];
     
-    this.range = {
+    this.outerRange = {
       start: {
         line: null,
         unit: null,
@@ -209,29 +212,19 @@ export const NodeExtensionBase: INodeExtensionBase =
         unit: null
       }
     };
+    this.innerRange = {
+      start: {
+        line: null,
+        unit: null,
+      },
+      end: {
+        line: null,
+        unit: null
+      }
+    };
+    
     if(typeof this._children === "function")
       this.children = Array.from(this._children()).filter(c => c != null);
-      
-    let previousTakesCommentNode = this.prev;
-    while(previousTakesCommentNode && previousTakesCommentNode.takesLeadingComments == false)
-    {
-      previousTakesCommentNode = previousTakesCommentNode.prev;
-    }
-    
-    if(this.takesLeadingComments != false)
-    {
-      for(let c of getLeadingComments(this, comments))
-      {
-        if(previousTakesCommentNode != null && c.positionStart.lineNumber == previousTakesCommentNode.tokenRange.positionEnd.lineNumber)
-        {
-          previousTakesCommentNode.trailingComments.push(extendComment(c, previousTakesCommentNode, "trail"))
-        }
-        else
-        {
-          this.leadingComments.push(extendComment(c, this, "prev"));
-        }
-      }
-    }
   },
   initFormat: function(this: IPrivateNodeExtension & ExtendedNode, state: IFormatState, wsBefore: number, wsAfter: number, opts: any) {
     this.isBroken = false;
@@ -247,11 +240,16 @@ export const NodeExtensionBase: INodeExtensionBase =
     this.wsBefore = wsBefore ?? 0;
     this.wsAfter  = wsAfter ?? 0;
     this.config   = this.state.config;
-    
+    if(this.prev && this.prev.trailingComments.any(c => c.kind == CommentKind.Line && this.prev.outerRange.end.line == this.state.line))
+    {
+      this.state = this.parent.subState({
+        unit: this.indentUnit(this.state.indent),
+        indent: this.state.indent,
+        line: this.state.line + 1
+      })
+    }
   },
-  finishFormat: function(this: IPrivateNodeExtension)
-  {
-  },
+  finishFormat: function(this: IPrivateNodeExtension){},
   formatLeadingComments: function(this: IPrivateNodeExtension): [FormatResult, IFormatState] {
     if(this.config.includeComments == false)
       return [FormatResult.Ok, this.state];
@@ -277,7 +275,7 @@ export const NodeExtensionBase: INodeExtensionBase =
       
     //trailing comments can never break line!
     let i = 0;
-    let state = this.subState(this.range.end);
+    let state = this.subState(this.innerRange.end);
     for(let c of this.trailingComments)
     {
       let result = c.format(state, this.config, i != 0);
@@ -324,24 +322,36 @@ export const NodeExtensionBase: INodeExtensionBase =
     }
     return false;
   },
-  setRangeStart: function(this: PrivateExtendedNode, cursor: Optional<Cursor> | ExtendedNode = null) {
+  setOuterRangeStart: function(this: PrivateExtendedNode, cursor: Optional<Cursor> | ExtendedNode = null) {
     if(isExtendedNode(cursor))
-      cursor = cursor.range.start;
-    this.range.start.line = cursor?.line ?? this.state.line;
-    this.range.start.unit = cursor?.unit ?? this.state.unit;
+      cursor = cursor.outerRange.start;
+    this.outerRange.start.line = cursor?.line ?? this.state.line;
+    this.outerRange.start.unit = cursor?.unit ?? this.state.unit;
   },
-  setRangeEnd: function(this: PrivateExtendedNode, cursor: Optional<Cursor> | ExtendedNode) {
+  setOuterRangeEnd: function(this: PrivateExtendedNode, cursor: Optional<Cursor> | ExtendedNode) {
+    if(isExtendedNode(cursor))
+      cursor = cursor.outerRange.end;
+    this.outerRange.end.line = (cursor?.line ?? this.state.line);
+    this.outerRange.end.unit = (cursor?.unit ?? this.state.unit);;
+  },
+  setInnerRangeStart(this: PrivateExtendedNode, cursor: Optional<Cursor>|ExtendedNode) {
+    if(isExtendedNode(cursor))
+      cursor = cursor.outerRange.end;
+    this.innerRange.start.line = cursor?.line ?? this.state.line;
+    this.innerRange.start.unit = cursor?.unit ?? this.state.unit;
+  },
+  setInnerRangeEnd(this: PrivateExtendedNode, cursor: Optional<Cursor>|ExtendedNode) {
     let off = this.respectsWhitespace == true ? this.wsAfter : 0;
     if(isExtendedNode(cursor))
-      cursor = cursor.range.end;
-    this.range.end.line = (cursor?.line ?? this.state.line);
-    this.range.end.unit = (cursor?.unit ?? this.state.unit) + off;
+      cursor = cursor.outerRange.end;
+    this.innerRange.end.line = (cursor?.line ?? this.state.line);
+    this.innerRange.end.unit = (cursor?.unit ?? this.state.unit) + off;
   },
   exceedsLineLength: function(this: PrivateExtendedNode, line: number): boolean {
-    if(this.range.end.line == line)
-      return this.range.end.unit > this.config.lineWidth;
+    if(this.outerRange.end.line == line)
+      return this.outerRange.end.unit > this.config.lineWidth;
       
-    if(this.range.end.line > line)
+    if(this.outerRange.end.line > line)
       return false;
       
     for(let c of this.children)
@@ -355,18 +365,17 @@ export const NodeExtensionBase: INodeExtensionBase =
     return false;
   },
   updateTokenRange: function(this: PrivateExtendedNode) {
-    let endUnit = this.respectsWhitespace == true ? (this.range.end.unit - this.wsAfter) : this.range.end.unit;
-    
+    let {start, end} = this.innerRange;
     Object.assign(this.tokenRange, {
       positionStart: {
-        lineNumber: this.range.start.line,
-        lineCodeUnit: this.respectsWhitespace == true ? (this.range.start.unit + this.wsBefore) : this.range.start.unit
+        lineNumber: start.line,
+        lineCodeUnit: this.respectsWhitespace == true ? (start.unit + this.wsBefore) : start.unit
       }
     });
     Object.assign(this.tokenRange,{
       positionEnd: {
-        lineNumber: this.range.end.line,
-        lineCodeUnit: this.respectsWhitespace == true ? (this.range.end.unit - this.wsAfter) : this.range.end.unit,
+        lineNumber: end.line,
+        lineCodeUnit: this.respectsWhitespace == true ? (end.unit - this.wsAfter) : end.unit,
       }
     });
     this.leadingComments.forEach(c => c.updateTokenRange());

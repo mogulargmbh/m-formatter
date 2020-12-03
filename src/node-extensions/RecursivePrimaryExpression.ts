@@ -13,10 +13,10 @@ function *_formatInline(this: This): FormatGenerator
   let s = this.subState();
   yield this.head.format(s);
   
-  s = this.subState(this.head.range.end);
+  s = this.subState(this.head.outerRange.end);
   yield this.recursiveExpressions.format(s);
     
-  this.setRangeEnd(this.recursiveExpressions);
+  this.setInnerRangeEnd(this.recursiveExpressions);
   return FormatResult.Ok;
 }
 

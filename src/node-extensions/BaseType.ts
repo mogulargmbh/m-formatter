@@ -18,10 +18,10 @@ function *_formatInline(this: This): FormatGenerator
     wsBefore = 1;
   yield this.constant.format(this.subState(), wsBefore, 1);
   
-  let s = this.subState(this.constant.range.end);
+  let s = this.subState(this.constant.outerRange.end);
   yield this.paired.format(s);
   
-  this.setRangeEnd(this.paired);
+  this.setInnerRangeEnd(this.paired);
   return FormatResult.Ok;
 }
 
