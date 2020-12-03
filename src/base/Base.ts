@@ -3,6 +3,7 @@ import { Optional } from '../interfaces';
 import { IFormatterConfig } from '../config/definitions';
 import { TComment } from '@microsoft/powerquery-parser/lib/language/comment';
 import { ExtendedComment, extendComment } from '../CommentExtension';
+import { defaultFormatterConfig } from '../config/default';
 
 export type IEnumerable<T> = Generator<T, void, unknown>;
 
@@ -41,6 +42,7 @@ export interface IFormatState extends Cursor
   forceLineBreak?: boolean;
   forceInline?: boolean;
   suppressInitialLineBreak?: boolean; //When first node in tree is a always line breaking node
+  config: IFormatterConfig
 }
 
 export type OptionalFormatState = Optional<IFormatState>;
@@ -58,6 +60,8 @@ export type FormatGenerator = Generator<FormatResult, FormatResult | void>
 export interface INodeExtensionBase
 {
   __extendedNode: boolean;
+  _id: number;
+  _formatCnt: number;
   leadingComments: ExtendedComment[];
   trailingComments: ExtendedComment[];
   parent: ExtendedNode;
@@ -69,9 +73,7 @@ export interface INodeExtensionBase
   range: Range;
   children: PublicExtendedNode[];
   config: IFormatterConfig,
-  _id: number;
-  _formatCnt: number;
-  initialize: (parent: ExtendedNode, prev: ExtendedNode, config: IFormatterConfig, comments: TComment[]) => void;
+  initialize: (parent: ExtendedNode, prev: ExtendedNode, comments: TComment[]) => void;
   hasContentString: () => boolean;
   subState: (state?: OptionalFormatState) => IFormatState;
   nextIndentUnit: () => number;
@@ -176,6 +178,8 @@ function getLeadingComments(node: ExtendedNode, comments: TComment[]): ExtendedC
 export const NodeExtensionBase: INodeExtensionBase =
 {
   __extendedNode: true,
+  _id: null,
+  _formatCnt: 0,
   parent: null,
   prev: null,
   state: null,
@@ -184,17 +188,14 @@ export const NodeExtensionBase: INodeExtensionBase =
   wsAfter: null,
   range: null,
   children: [],
-  config: null,
+  config: defaultFormatterConfig,
   leadingComments: null,
   trailingComments: null,
-  _id: null,
-  _formatCnt: 0,
-  initialize: function(this: PrivateExtendedNode, parent: ExtendedNode, prev: ExtendedNode, config: IFormatterConfig, comments: TComment[]) {
+  initialize: function(this: PrivateExtendedNode, parent: ExtendedNode, prev: ExtendedNode, comments: TComment[]) {
     this._id              = NodeCounter;
     NodeCounter++;
     this.parent           = parent;
     this.prev             = prev;
-    this.config           = config;
     this.leadingComments  = [];
     this.trailingComments = [];
     
@@ -210,14 +211,20 @@ export const NodeExtensionBase: INodeExtensionBase =
     };
     if(typeof this._children === "function")
       this.children = Array.from(this._children()).filter(c => c != null);
+      
+    let previousTakesCommentNode = this.prev;
+    while(previousTakesCommentNode && previousTakesCommentNode.takesLeadingComments == false)
+    {
+      previousTakesCommentNode = previousTakesCommentNode.prev;
+    }
     
-    if(config.includeComments == true && this.takesLeadingComments != false)
+    if(this.takesLeadingComments != false)
     {
       for(let c of getLeadingComments(this, comments))
       {
-        if(this.prev != null && c.positionStart.lineNumber == this.prev.tokenRange.positionEnd.lineNumber)
+        if(previousTakesCommentNode != null && c.positionStart.lineNumber == previousTakesCommentNode.tokenRange.positionEnd.lineNumber)
         {
-          this.prev.trailingComments.push(extendComment(c, this.prev, "trail"))
+          previousTakesCommentNode.trailingComments.push(extendComment(c, previousTakesCommentNode, "trail"))
         }
         else
         {
@@ -226,7 +233,7 @@ export const NodeExtensionBase: INodeExtensionBase =
       }
     }
   },
-  initFormat: function(this: IPrivateNodeExtension, state: IFormatState, wsBefore: number, wsAfter: number, opts: any) {
+  initFormat: function(this: IPrivateNodeExtension & ExtendedNode, state: IFormatState, wsBefore: number, wsAfter: number, opts: any) {
     this.isBroken = false;
     this._formatCnt++;
     if(opts != null)
@@ -239,13 +246,18 @@ export const NodeExtensionBase: INodeExtensionBase =
     this.state    = state;
     this.wsBefore = wsBefore ?? 0;
     this.wsAfter  = wsAfter ?? 0;
+    this.config   = this.state.config;
+    
   },
   finishFormat: function(this: IPrivateNodeExtension)
   {
   },
   formatLeadingComments: function(this: IPrivateNodeExtension): [FormatResult, IFormatState] {
-    let i = 0;
+    if(this.config.includeComments == false)
+      return [FormatResult.Ok, this.state];
+      
     let state = this.state;
+    let i = 0;
     for(let c of this.leadingComments)
     {
       let result = c.format(state, this.config, i != 0);
@@ -260,6 +272,9 @@ export const NodeExtensionBase: INodeExtensionBase =
     return [FormatResult.Ok, state];
   },
   formatTrailingComments: function(this: IPrivateNodeExtension): [FormatResult, IFormatState] {
+    if(this.config.includeComments == false)
+      return [FormatResult.Ok, this.state];
+      
     //trailing comments can never break line!
     let i = 0;
     let state = this.subState(this.range.end);
@@ -340,6 +355,8 @@ export const NodeExtensionBase: INodeExtensionBase =
     return false;
   },
   updateTokenRange: function(this: PrivateExtendedNode) {
+    let endUnit = this.respectsWhitespace == true ? (this.range.end.unit - this.wsAfter) : this.range.end.unit;
+    
     Object.assign(this.tokenRange, {
       positionStart: {
         lineNumber: this.range.start.line,
@@ -349,7 +366,7 @@ export const NodeExtensionBase: INodeExtensionBase =
     Object.assign(this.tokenRange,{
       positionEnd: {
         lineNumber: this.range.end.line,
-        lineCodeUnit: this.respectsWhitespace == true ? (this.range.end.unit - this.wsAfter) : this.range.end.unit
+        lineCodeUnit: this.respectsWhitespace == true ? (this.range.end.unit - this.wsAfter) : this.range.end.unit,
       }
     });
     this.leadingComments.forEach(c => c.updateTokenRange());

@@ -54,12 +54,16 @@ function *_formatInline(this: This): FormatGenerator
 {
   let { line, unit } = this.state;
   let i = 0;
+  
+  if(this.elements.any(c => (c.trailingComments && c.trailingComments.length != 0)))
+    return FormatResult.Break;
+  
   for(let c of this.elements)
   {
     let s = this.subState({
       line,
       unit,
-    })
+    });
     yield c.format(s, this.opts.inlineWsBefore(c,i,this.elements.length), this.opts.inlineWsAfter(c,i,this.elements.length));
       
     line = c.range.end.line;

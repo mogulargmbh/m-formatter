@@ -11,6 +11,7 @@ export function format(this: PrivateExtendedNode, state: IFormatState, wsBefore:
   this.state = s;
   if(res == FormatResult.Break && this.state.stopOnLineBreak)
     return FormatResult.Break;
+  this.setRangeStart();
     
   
   if(this.state.forceLineBreak != true)
@@ -39,10 +40,11 @@ export function format(this: PrivateExtendedNode, state: IFormatState, wsBefore:
   
   this.setRangeEnd(this.lastChild() ?? this.state);
   
-  if(this.trailingComments.any())
+  if(this.trailingComments?.any())
   {
     let [res2, s2] = this.formatTrailingComments();
-    this.setRangeEnd(s2);
+    if(res2 == FormatResult.Break && this.state.stopOnLineBreak)
+      return FormatResult.Break;
   }
   
   this.finishFormat();

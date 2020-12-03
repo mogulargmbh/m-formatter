@@ -8,7 +8,6 @@ import { defaultFormatterConfig } from './config/default';
 import { ExtendedNode, IFormatState } from './base/Base';
 import { TComment } from './pq-ast';
 
-
 export function parse(code: string): [Ast.INode, TComment[]]
 {
   let parsed = Task.tryLexParse(
@@ -26,9 +25,8 @@ export function parse(code: string): [Ast.INode, TComment[]]
   }
 }
 
-export function format(code: string, formatterConfig: Optional<IFormatterConfig> = null): ExtendedNode
+export function format(ast: ExtendedNode, formatterConfig: Optional<IFormatterConfig> = null): ExtendedNode
 {
-  let [ast, comments] = parse(code);
   let cfg: IFormatterConfig = {
     ...defaultFormatterConfig,
     ...(formatterConfig ?? {})
@@ -36,22 +34,54 @@ export function format(code: string, formatterConfig: Optional<IFormatterConfig>
   
   try
   {
-    let extended = extendAll(ast, code, cfg, comments);
     let state: IFormatState = {
       unit: 0,
       line: 0,
       indent: 0,
       suppressInitialLineBreak: true,
+      config: cfg,
     }
-    let r = extended.format(state); //TODO: result relevant?
-    extended.updateTokenRange();
-    return extended;
+    let r = ast.format(state); //TODO: result relevant?
+    ast.updateTokenRange();
+    return ast;
   }
   catch(error)
   {
-    if(error instanceof FormatError)
-      throw error;
-    else 
-      throw new FormatError("Could not format code", "FORMATTER_ERROR", error);
+    throw formatExceptionHandler(error);
   }
+}
+
+export function extendAndFormat(ast: Ast.INode, comments: TComment[], formatterConfig: Optional<IFormatterConfig> = null)
+{
+  try 
+  {
+    let extended = extendAll(ast, comments);
+    return format(extended, formatterConfig);
+  } 
+  catch (error) 
+  {
+    throw formatExceptionHandler(error); 
+  }
+  
+}
+
+export function formatCode(code: string, config: Optional<IFormatterConfig> = null): ExtendedNode
+{
+  try
+  {
+    let [ast, comments] = parse(code);
+    return extendAndFormat(ast, comments, config);
+  }
+  catch(err)
+  {
+    throw formatExceptionHandler(err); 
+  }
+}
+
+function formatExceptionHandler(error)
+{
+  if(error instanceof FormatError)
+    return error;
+  else 
+    return new FormatError("Could not format code", "FORMATTER_ERROR", error);
 }

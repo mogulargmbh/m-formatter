@@ -5,17 +5,20 @@ import { ExtendedNode, IPrivateNodeExtension, INodeExtensionBase } from './base/
 import { IFormatterConfig } from './config/definitions';
 import { extendComment } from './CommentExtension';
 
-export function extendAll(node: Ast.INode, sourceCode: string, config: IFormatterConfig, comments: TComment[], parent: ExtendedNode = null, previous: ExtendedNode = null): ExtendedNode
+export function extendAll(node: Ast.INode, comments: TComment[], parent: ExtendedNode = null, previous: ExtendedNode = null): ExtendedNode
 {
+  if(isExtendedNode(node))
+    return node; //TODO: the right way?? do I need to reinit the comments or not?
+    
   let res = extend(node);
-  res.initialize(parent, previous, config, comments);
+  res.initialize(parent, previous, comments);
   let prev = res;
   for(let c of res.children)
   {
-    prev = extendAll(c, sourceCode, config, comments, res, prev);
+    prev = extendAll(c, comments, res, prev);
   }
   
-  if(parent == null && config.includeComments == true) //root node
+  if(parent == null) //root node
     res.trailingComments = comments.map(c => extendComment(c, res, "trail"));
   
   return res;
@@ -29,13 +32,10 @@ function isExtendedNode(node: Ast.INode): node is ExtendedNode
 export function extend(node: Ast.INode, parent: ExtendedNode = null): ExtendedNode
 {
   let ext: any;
-  if(isExtendedNode(node) == false)
-  {
-    ext = {
-      ...getExtension(node.kind)
-    };
-    Object.assign(node, ext);
-  }
+  ext = {
+    ...getExtension(node.kind)
+  };
+  Object.assign(node, ext);
   let res = node as ExtendedNode;
   return res;
 }

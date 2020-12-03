@@ -1,6 +1,3 @@
-import { FormatError } from '../Error';
-import { Optional } from '../interfaces';
-
 export enum AlignmentStrategy
 {
   //Never align
@@ -19,8 +16,6 @@ export interface IFormatterConfig
   indentationLength: number;
   //Includes comments in the format results, default = true
   includeComments: boolean;
-  //Newline after CSV under LetExpression
-  // newLineCsvInLet: boolean;
   //Indent section members
   indentSectionMembers: boolean;
   //Align line comments
@@ -29,6 +24,8 @@ export interface IFormatterConfig
   alignPairedLetExpressionsByEqual: AlignmentStrategy;
   //Align paired expressions by their equal sign, default = false.
   alignPairedRecordExpressionsByEqual: AlignmentStrategy;
+  //Newline after CSV under LetExpression
+  // newLineCsvInLet: boolean;
 }
 
 export interface ITextAstSerializerConfig
@@ -39,18 +36,14 @@ export interface ITextAstSerializerConfig
   lineEnd: string;
 }
 
-export interface IHtmlSerializerConfig
+export interface IHtmlAstSerializerConfig
 {
   debugMode?: boolean;
   //String that is used as a whitespace, default = "&nbsp;"
   ws: string;
-  //String that is used for indentation, default = "&nbsp;&nbsp;". Indentation length of FormatterConfig must be set accordingly
-  indentation: string;
   //String that is used to terminate a line, default = "<br/>"
   lineEnd: string;
   //Number of different bracket classes, default = 3. The formatter assigns bracket pairs the classes 'bracket' and 'bracket-{num}' where num = 1...{numBrackets}. You can then style your matching brackets with configurable depth.
   numBrackets: number;
 }
-
-
 

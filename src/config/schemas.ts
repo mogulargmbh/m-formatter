@@ -10,7 +10,7 @@ export var IFormatterConfigSchema = {
     lineWidth: { type: "number", min: 50},
     indentationLength: { type: "number", min: 0},
     includeComments: {type: "boolean"},
-    newlineCsvInLeft: {type: "boolean"},
+    indentSectionMembers: {type: "boolean"},
     alignLineCommentsToPosition: {type: "number"},
     alignPairedLetExpressionsByEqual: alignmentStrategySchema,
     alignPairedRecordExpressionsByEqual: alignmentStrategySchema
@@ -25,7 +25,6 @@ export var ITextAstSerializerConfigSchema = {
   properties: {
     debugMode: {type: "boolean"},
     ws: { type: "string" },
-    indentation: { type: "string"},
     lineEnd: { type: "string" },
   },
   additionalProperties: false,
@@ -38,11 +37,8 @@ export var IHtmlAstSerializerConfigSchema = {
   properties: {
     debugMode: {type: "boolean"},
     ws: { type: "string" },
-    indentation: { type: "string"},
     lineEnd: { type: "string" },
     numBrackets: { type: "number", min: 1},
-    inlineCss: { type: "string" },
-    inlineCssToggle: {type: "boolean"},
   },
   additionalProperties: false,
   required: []

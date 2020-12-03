@@ -1,12 +1,10 @@
-import { format } from '../main';
-import { FormatError } from '../Error';
-import { parse } from 'path';
 import { performance } from 'perf_hooks';
 import { Optional } from '../interfaces';
-import { IFormatterConfig, IHtmlSerializerConfig } from '../config/definitions';
+import { IFormatterConfig, IHtmlAstSerializerConfig } from '../config/definitions';
 import { TextAstSerializer } from '../serializer/TextAstSerializer';
 import { TestCase, TestError, TestResult } from './common';
 import * as fs from 'fs';
+import { formatCode, format, parse, extendAndFormat } from '../formatter';
 
 const serializer = new TextAstSerializer();
 
@@ -27,7 +25,7 @@ export function runTests(cases: TestCase[]): number
   return results.reduce((c,v) => c += v.error != null ? 1 : 0, 0)
 }
 
-function runTestCase(c: TestCase): TestResult
+export function runTestCase(c: TestCase): TestResult
 {
   let { identifier, code } = c;
   try
@@ -35,14 +33,15 @@ function runTestCase(c: TestCase): TestResult
     console.log(`Running TextSerializer test ${identifier}`);
     let formatterConfig: Optional<IFormatterConfig> = {
     };
-    let htmlSerializerConfig: Optional<IHtmlSerializerConfig> = {
+    let htmlSerializerConfig: Optional<IHtmlAstSerializerConfig> = {
       debugMode: true
     };
     
-    let start       = performance.now();
-    let ast         = format(code, formatterConfig)
-    let result      = serializer.serialize(ast, htmlSerializerConfig);
-    let end         = performance.now();
+    let start              = performance.now();
+    let [parsed, comments] = parse(code);
+    let ast                = extendAndFormat(parsed, comments, formatterConfig);
+    let result             = serializer.serialize(ast, htmlSerializerConfig);
+    let end                = performance.now();
     
     //Check if textContent == code (ignore all whitespace)
     let is     = result.replace(/\s/g, "");
@@ -73,6 +72,13 @@ function runTestCase(c: TestCase): TestResult
       throw new TestError("Cannot reparse converted tab indentation text result", identifier, null, is, should);
     }
     
+    let formatted2 = extendAndFormat(ast, comments.slice(), formatterConfig)
+    let result2 = serializer.serialize(formatted2, htmlSerializerConfig);
+    if(result != result2)
+      throw new TestError("Second format pass yielded different result", identifier, null, is, should);
+    
+    fs.writeFileSync("./debug.pq", result);
+    fs.writeFileSync("./debug2.pq", result2);
     console.log(`-- success in ${end-start}ms`);
     return {
       result,
@@ -81,6 +87,7 @@ function runTestCase(c: TestCase): TestResult
   }
   catch(err)
   {
+    console.error(err.message);
     return {
       error: err,
       case: c

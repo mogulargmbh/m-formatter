@@ -1,6 +1,10 @@
 import "./extensions";
-export { HtmlAstSerializer } from './serializer/HtmlAstSerializer';
+export { ExtendedNode, isExtendedNode } from './base/Base';
+export { HtmlAstSerializer, getTokenClasses } from './serializer/HtmlAstSerializer';
 export { TextAstSerializer } from './serializer/TextAstSerializer';
 export { FormatError, ErrorKind, GenericError } from "./Error";
 export * from "./config/definitions";
-export { format } from "./formatter";
+export { extendAll } from './Factory';
+export { format, formatCode, parse } from "./formatter";
+export { Ast } from "./pq-ast";
+export * as Util from "./Util";

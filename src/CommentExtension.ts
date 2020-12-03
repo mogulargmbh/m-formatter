@@ -1,7 +1,8 @@
 import { IFormatterConfig } from './config/definitions';
 import { TComment } from './pq-ast';
 import { ExtendedNode, Range, IFormatState, FormatResult } from './base/Base';
-import { assertnever } from './Util';
+import { assertnever, spliteByLineEnd as splitByNewline } from './Util';
+import { CommentKind } from '@microsoft/powerquery-parser/lib/language/comment';
 
 type ICommentExtensionBase = {
   trailingNewLine: boolean,
@@ -11,6 +12,7 @@ type ICommentExtensionBase = {
   initialize: (node: ExtendedNode) => void;
   format: (state: IFormatState, config: IFormatterConfig, suppressLeadingLineBreak?: boolean) => FormatResult;
   updateTokenRange: () => void;
+  lines: string[];
 }
 
 type TCommentKind = "prev"|"trail";
@@ -42,17 +44,26 @@ const CommentExtensionBase: ICommentExtensionBase = {
   leadingNewLine: false,
   trailingNewLine: false,
   node: null,
+  lines: null,
   range: null,
   initialize: function(this: ExtendedComment, node: ExtendedNode) {
     this.node = node;
     this.range = {
-      start: null,
-      end: null,
+      start: {
+        line: this.positionStart.lineNumber,
+        unit: this.positionStart.lineCodeUnit
+      },
+      end: {
+        line: this.positionEnd.lineNumber,
+        unit: this.positionEnd.lineCodeUnit
+      }
     }
     this.trailingNewLine = this.positionStart.lineNumber != node.tokenRange.positionStart.lineNumber;
     
     let lastNode: ExtendedNode = getPreviousNode(node);
     this.leadingNewLine = lastNode && lastNode.tokenRange.positionEnd.lineNumber != this.positionStart.lineNumber;
+    if(this.kind == CommentKind.Multiline)
+      this.lines = splitByNewline(this.data.trim())
   },
   updateTokenRange: function(this: ExtendedComment) {
     Object.assign(this.positionStart, {
@@ -91,10 +102,10 @@ const CommentExtensionBase: ICommentExtensionBase = {
         }
         
         this.range.end = {
-          line,
+          line: line,
           unit: unit + this.data.length
         }
-        return FormatResult.Ok;
+        return FormatResult.Break;
       }
       case "prev":
       {
@@ -115,21 +126,34 @@ const CommentExtensionBase: ICommentExtensionBase = {
           }
         }
         
+        let lines = 0;
+        let endUnit = 0;
+        if(this.kind == CommentKind.Multiline)
+        {
+          lines = this.lines.length - 1;
+          endUnit = this.lines.last().length;
+        }
+        else
+        {
+          endUnit = unit + this.data.length;
+        }
+        
         if(this.trailingNewLine == true)
         {
           this.range.end = {
-            line: line + 1,
+            line: line + lines + 1,
             unit: config.indentationLength * state.indent
           }
         }
         else
         {
           this.range.end = {
-            line: line,
-            unit: unit + this.data.length
+            line: line + lines,
+            unit: endUnit,
           }
         }
-        return FormatResult.Ok;
+        
+        return state.line != this.range.end.line ? FormatResult.Break : FormatResult.Ok;
       }
       default: 
       {

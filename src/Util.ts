@@ -12,3 +12,10 @@ export function assertnever(_: never): never
 {
   throw new Error("Should never happen");
 }
+
+const newLineRegex = /(\r\n|\n)/g;
+
+export function spliteByLineEnd(str: string): string[]
+{
+  return str.split(newLineRegex).filter(e => newLineRegex.test(e) == false);
+}

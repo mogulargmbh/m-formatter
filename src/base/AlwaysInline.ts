@@ -9,9 +9,10 @@ function format(this: PrivateExtendedNode, state: IFormatState, wsBefore: number
   
   let [res, s] = this.formatLeadingComments();
   this.state = s;
+  this.setRangeStart();
   
   if(res == FormatResult.Break && this.state.stopOnLineBreak)
-  return FormatResult.Break;
+    return FormatResult.Break;
   
   for(let r of retGen(this._formatInline()))
   {
@@ -26,10 +27,11 @@ function format(this: PrivateExtendedNode, state: IFormatState, wsBefore: number
   if(this.range.end.line == null)
     throw new Error(`Forgot set range call for ${this._ext}`);
   
-  if(this.trailingComments.any())
+  if(this.trailingComments?.any())
   {
     let [res2, s2] = this.formatTrailingComments();
-    this.setRangeEnd(s2);
+    if(res2 == FormatResult.Break && this.state.stopOnLineBreak)
+      return FormatResult.Break;
   }
   
   this.finishFormat();

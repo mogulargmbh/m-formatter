@@ -8,6 +8,9 @@ declare module "@microsoft/powerquery-parser/lib/language/ast/ast"
   }
 }
 declare global {
+  interface Error {
+    toInterface?(): any;
+  }
   interface Array<T> {
     contains(arg: T | ((el: T) => boolean)): boolean;
     any(fn?: (el: T, i?: number) => boolean): boolean;
@@ -17,6 +20,15 @@ declare global {
     selectMany<TProp>(fn: (el: T) => TProp[]): Array<TProp>;
     last(): T;
     first(): T;
+  }
+}
+
+Error.prototype.toInterface = function(this: Error)
+{
+  return {
+    message: this.message,
+    name: this.name,
+    stack: this.stack
   }
 }
 

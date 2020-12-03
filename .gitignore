@@ -4,3 +4,4 @@ dist
 *.tgz
 testPage.html
 testText.txt
+debug*.pq

@@ -1,5 +1,5 @@
 import { AlignmentStrategy } from './definitions';
-import { IFormatterConfig, ITextAstSerializerConfig, IHtmlSerializerConfig } from './definitions';
+import { IFormatterConfig, ITextAstSerializerConfig, IHtmlAstSerializerConfig } from './definitions';
 
 
 export const defaultFormatterConfig: IFormatterConfig = {
@@ -18,9 +18,8 @@ export var defaultTextSerializerConfig: ITextAstSerializerConfig = {
   ws: " ",
 };
 
-export var defaultHtmlSerializerConfig: IHtmlSerializerConfig = {
+export var defaultHtmlSerializerConfig: IHtmlAstSerializerConfig = {
   debugMode: false,
-  indentation: "&nbsp;&nbsp;",
   lineEnd: "<br/>",
   ws: "&nbsp;",
   numBrackets: 3,

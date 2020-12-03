@@ -8,12 +8,17 @@ type NodeType = Ast.SectionMember;
   
 type This = ExtendedNode<NodeType>;
 
+//This node actually breaks line but not based on state but based on the ast (only if maybeLiteralAttributes != null)
+
 function *_formatInline(this: This): FormatGenerator
 {
   let s = this.subState();
   
   if(this.maybeLiteralAttributes)
   {
+    if(this.state.stopOnLineBreak)
+      return FormatResult.Break;
+      
     yield this.maybeLiteralAttributes.format(s);
     s = this.subState({
       line: this.maybeLiteralAttributes.range.end.line + 1,
