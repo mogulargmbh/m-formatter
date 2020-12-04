@@ -74,29 +74,12 @@ function *_formatInline(this: This): FormatGenerator
   return FormatResult.Ok;
 }
 
-function formatElements(node: This, opts: any, line: number, indent: number, unit: number, breakOnNewline: boolean) 
-{
-  for(let c of node.elements)
-  {
-    let s = node.subState({
-      line, 
-      unit,
-      indent,
-      suppressInitialLineBreak: true
-    });
-    let res = c.format(s, null, null, opts);
-    if(c.outerRange.end.line != line && breakOnNewline == true)
-      return false;
-      
-    line = c.outerRange.end.line + 1;
-  }
-  return true;
-}
-
 function _formatBroken(this: This): FormatResult
 {
   let line: number, indent: number, unit: number;
   
+  if(this.elements.first().kind == "InvokeExpression") //This is a special case I observed when a InvokeExpression and ItemAccessExpression or other expressions are used consecutively (case 35)
+    return formatInvokeExpressionBroken.bind(this)();
   
   if(this.elements.length == 1)
   {
@@ -145,6 +128,41 @@ function _formatBroken(this: This): FormatResult
     }
   }
   
+  return FormatResult.Ok;
+}
+
+function formatElements(node: This, opts: any, line: number, indent: number, unit: number, breakOnNewline: boolean) 
+{
+  for(let c of node.elements)
+  {
+    let s = node.subState({
+      line, 
+      unit,
+      indent,
+      suppressInitialLineBreak: true
+    });
+    let res = c.format(s, null, null, opts);
+    if(c.outerRange.end.line != line && breakOnNewline == true)
+      return false;
+      
+    line = c.outerRange.end.line + 1;
+  }
+  return true;
+}
+
+function formatInvokeExpressionBroken(this: This)
+{
+  let invoke = this.elements.first();
+  let s = this.subState();
+  
+  invoke.format(s);
+  s = this.subState(invoke.outerRange.end);
+  let res: FormatResult;
+  for(let e of this.elements.slice(1))
+  {
+    res = e.format(s);
+    s = this.subState(e.outerRange.end);
+  }
   return FormatResult.Ok;
 }
 

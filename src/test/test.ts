@@ -17,7 +17,7 @@ async function main()
   ];
   
   let errors = 0;
-  // errors += TxtTest.runTests(cases);
+  errors += TxtTest.runTests(cases);
   errors += HtmlTest.runTests(cases);
   
   console.log(`Tests finished, errors: ${errors}`);

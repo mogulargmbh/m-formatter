@@ -96,6 +96,7 @@ function _formatBroken(this: This): FormatResult
       ...this.elseConstant.outerRange.end,
       suppressInitialLineBreak: true,
       indent: indent,
+      forceLineBreak: true
     });
     s.unit += 1;
   }

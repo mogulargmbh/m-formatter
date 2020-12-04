@@ -17,7 +17,7 @@ const txt = new TextAstSerializer();
 const html = new HtmlAstSerializer();
 
 let cases = getCases();
-c = cases[31]
+c = cases[46];
 
 // let code = "\nlet \n  GetParameterImpl=(tableName as any, keyName) as any => \n    let\n      value = Table.SelectRows(tableData, each ([Key] = keyName)){0}[Value],\n      tableData = Excel.CurrentWorkbook(){[Name=tableName]}[Content]\n    in \n      value,\n  GetParameterImpl=(t) as null => testtttttttttt,\n  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = @test,\n  Test=Number.Add\nin \n  GetParameterImpl"
 // let connectorCases = getConnectorCases();
