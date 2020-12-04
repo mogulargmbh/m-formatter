@@ -3,7 +3,7 @@ import { IPrivateNodeExtension, ExtendedNode, FormatResult, FormatGenerator } fr
 import { BreakOnLineEndNodeBase } from '../base/BreakOnLineEnd';
 import { BreakOnAnyChildBrokenNodeBase } from '../base/BreakOnAnyChild';
 
-type BinaryExpression = Ast.EqualityExpression 
+export type BinaryExpression = Ast.EqualityExpression 
   | Ast.ArithmeticExpression
   | Ast.AsExpression 
   | Ast.EqualityExpression 
@@ -29,6 +29,7 @@ function _formatBroken(this: This): FormatResult
 {
   this.left.format(this.subState({
     forceLineBreak: this.left._ext == "BinaryOperatorExpression" ? true : null,
+    // suppressInitialLineBreak: this.state.suppressInitialLineBreak //TODO: does that make sense?
   }));
   
   this.operatorConstant.format(this.subState({
@@ -37,8 +38,11 @@ function _formatBroken(this: This): FormatResult
     line: this.left.outerRange.end.line + 1
   }), 0, 1);
   
-  let s = this.subState(this.operatorConstant.outerRange.end);
-  this.right.format(s); //No need for notify break as this node is breaking hence when state.notifyBreak is true this._formatBroken would nevre be called!
+  let s = this.subState({
+    ...this.operatorConstant.outerRange.end,
+    indent: this.state.indent + 1
+  });
+  this.right.format(s); //No need for notify break as this node is breaking hence when state.notifyBreak is true this._formatBroken would never be called!
   return FormatResult.Break;
 }
 

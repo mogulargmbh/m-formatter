@@ -2,6 +2,7 @@ import { Ast } from "../pq-ast";
 import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension } from '../base/Base';
 import { BreakOnAnyChildBrokenNodeBase } from '../base/BreakOnAnyChild';
 import { NotSupported } from '../Util';
+import { BinaryExpression } from './BinaryOperatorExpression';
 
 type NodeType = Ast.FunctionExpression
   
@@ -27,6 +28,22 @@ function *_formatInline(this: This): FormatGenerator
   return FormatResult.Ok;
 }
 
+function getNextNode(node: ExtendedNode): ExtendedNode
+{
+  let n = node;
+  while(n && n._ext == "BinaryOperatorExpression")
+  {
+    n = (n as ExtendedNode<BinaryExpression>).left;
+  }
+  return n;
+}
+
+const bracedNodes = [
+  "BracedArrayWrapper",
+  "BracedArrayWrapperOptional",
+  "BracedWrapper"
+]
+
 function _formatBroken(this: This): FormatResult
 {
   let s = this.subState();
@@ -42,12 +59,25 @@ function _formatBroken(this: This): FormatResult
   this.fatArrowConstant.format(s, 1, 0);
   
   s = this.subState({
-    line: this.fatArrowConstant.outerRange.end.line + 1,
+    line:  this.fatArrowConstant.outerRange.end.line + 1,
     unit: this.nextIndentUnit(),
     indent: this.state.indent + 1,
     suppressInitialLineBreak: true
   });
   this.expression.format(s);
+  
+  let nextNodeExt = getNextNode(this.expression)._ext;
+  if(bracedNodes.contains(nextNodeExt) && this.expression.isBroken) //Pack braced nodes in the same line
+  {
+    s = this.subState({
+      line: this.fatArrowConstant.outerRange.end.line,
+      unit: this.fatArrowConstant.outerRange.end.unit + 1,
+      indent: this.state.indent,
+      suppressInitialLineBreak: true
+    });
+    this.expression.format(s);
+
+  }
   
   return FormatResult.Ok;
 }

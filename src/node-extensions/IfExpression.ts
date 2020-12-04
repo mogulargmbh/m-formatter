@@ -54,17 +54,33 @@ function _formatBroken(this: This): FormatResult
   
   s = this.subState({
     ...this.ifConstant.outerRange.end,
-    indent: indent + 1
+    indent: indent
   });
-  this.condition.format(s);
   
-  s = this.subState(this.condition.outerRange.end);
-  this.thenConstant.format(s, 1, 0);
+  this.condition.format(s);
+  let wsBefore; 
+  if(this.condition.outerRange.end.line != this.ifConstant.outerRange.end.line) //TODO SqlODBC.pq if condition breaks does that look best?
+  {
+    s = this.subState({
+      line: this.condition.outerRange.end.line + 1,
+      indent: indent,
+      unit: this.indentUnit(indent)
+    });
+    wsBefore = 0;
+  }
+  else
+  {
+    s = this.subState(this.condition.outerRange.end);
+    wsBefore = 1;
+  }
+  
+  this.thenConstant.format(s, wsBefore, 0);
   
   s = this.subState({
     line: this.thenConstant.outerRange.end.line + 1,
     indent: indent + 1,
-    unit: this.indentUnit(indent + 1)
+    unit: this.indentUnit(indent + 1),
+    suppressInitialLineBreak: true
   });
   this.trueExpression.format(s);
   

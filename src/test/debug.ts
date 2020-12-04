@@ -16,12 +16,13 @@ let c = null;
 const txt = new TextAstSerializer();
 const html = new HtmlAstSerializer();
 
-// let cases = getCases();
-// c = cases[39]
+let cases = getCases();
+c = cases[31]
 
 // let code = "\nlet \n  GetParameterImpl=(tableName as any, keyName) as any => \n    let\n      value = Table.SelectRows(tableData, each ([Key] = keyName)){0}[Value],\n      tableData = Excel.CurrentWorkbook(){[Name=tableName]}[Content]\n    in \n      value,\n  GetParameterImpl=(t) as null => testtttttttttt,\n  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = @test,\n  Test=Number.Add\nin \n  GetParameterImpl"
-let connectorCases = getConnectorCases();
-c = connectorCases.find(c => c.identifier == "DataWorldSwagger.pq");
+// let connectorCases = getConnectorCases();
+// c = connectorCases.find(c => c.identifier == "SqlODBC.pq");
+
 code = c.code;
 
 
@@ -54,13 +55,14 @@ function test(code: string)
     // let r = form(code, {lineWidth: 61}, "txt");
     // code = r[0];
     // console.log(r[0]);
-    let [res, ast, comments] = form(code, {}, "txt", {debugMode: true});
-    let ast2 = format(ast, {});
-    let res2 = txt.serialize(ast2, {debugMode: true} as any);
-    console.log(res == res2);
-    writeDiffFiles(res, res2);
+    let [res, ast, comments] = form(code, {}, "html", {debugMode: true});
+    // let ast2 = format(ast, {});
+    // let res2 = html.serialize(ast2, {debugMode: true} as any);
+    // console.log(res == res2);
+    // writeDiffFiles(res, res2);
     clipboard.writeSync(res);
-    clipboard.writeSync(res2);
+    console.log(res);
+    // clipboard.writeSync(res2);
   }
   catch(error)
   {
