@@ -35,7 +35,7 @@ meta: ${JSON.stringify(this.meta)}`;
     return {
       message: this.message,
       kind: this.kind,
-      innerError: this.innerError.toInterface(),
+      innerError: (this.innerError && typeof this.innerError.toInterface == "function") ? this.innerError.toInterface() : null,
       meta: this.meta,
       name: this.name,
       stack: this.stack,
