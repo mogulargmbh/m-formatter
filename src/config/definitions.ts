@@ -1,49 +1,31 @@
 export enum AlignmentStrategy
 {
-  //Never align
-  never = "never",
-  //Always align
-  always = "always",
-  //Only align when all expressions in the current scope are single line and won't exceed their line length when aligned by the equal sign.
-  singleline = "singleline"
+  never = "never",          //Never align
+  always = "always",        //Always align
+  singleline = "singleline" //Only align when all expressions in the current scope are single line and won't exceed their line length when aligned by the equal sign.
 }
 
-export interface IFormatterConfig
+export interface IFormatterConfig 
 {
-  //Maximum line width, default = 100. The formatter forces expression to break into several lines if the maximum line width would be reached. Please not some expressions cannot be broken into multiple lines such as very long identifiers and therefore the maximum line width can be exceeded in these cases. As of now there is no warning to give you info about that.
-  lineWidth: number;
-  //Length of the indentation string (is used for determining when the max line width is reached)
-  indentationLength: number;
-  //Includes comments in the format results, default = true
-  includeComments: boolean;
-  //Indent section members
-  indentSectionMembers: boolean;
-  //Align line comments
-  alignLineCommentsToPosition: number;
-  //Align paired expressions by their equal sign, default = false.
-  alignPairedLetExpressionsByEqual: AlignmentStrategy;
-  //Align paired expressions by their equal sign, default = false.
-  alignPairedRecordExpressionsByEqual: AlignmentStrategy;
-  //Newline after CSV under LetExpression
-  // newLineCsvInLet: boolean;
+  lineWidth: number;                                        //(default=100) the number of characters in one line that serves for the formatter as a limit
+  indentationLength: number;                                //(default=2) the number of indentation characters used for indentation
+  alignPairedLetExpressionsByEqual: AlignmentStrategy;      //(default="singleline") align paired expressions that are children of a let expression by the equal chaaracters
+  alignPairedRecordExpressionsByEqual: AlignmentStrategy;   //(default="singleline") align paired expressions that are children of a record expression by the equal character 
+  alignLineCommentsToPosition: number;                      //(default=null) align line end comments (starting with "//" and in non empty code lines) to a specific position. Null of no alignment should happen.
+  includeComments: boolean;                                 //(default=true) toggle include or exclude comments
+  indentSectionMembers: boolean;                            //(default=true) toggle indentation of section members
+  //newlineCsvInLet
 }
 
-export interface ITextAstSerializerConfig
+export interface ITextAstSerializerConfig 
 {
-  //String that is used as a whitespace, default = " "
-  ws: string;
-  //String that is used to terminate a line, default = "\n"
-  lineEnd: string;
+  ws: string;               //(default: " ") character to use as whitespace
+  lineEnd: string;          //(default: "\n") character to use as line break
 }
 
-export interface IHtmlAstSerializerConfig
-{
-  debugMode?: boolean;
-  //String that is used as a whitespace, default = "&nbsp;"
-  ws: string;
-  //String that is used to terminate a line, default = "<br/>"
-  lineEnd: string;
-  //Number of different bracket classes, default = 3. The formatter assigns bracket pairs the classes 'bracket' and 'bracket-{num}' where num = 1...{numBrackets}. You can then style your matching brackets with configurable depth.
-  numBrackets: number;
+export interface IHtmlAstSerializerConfig {
+  debugMode: boolean;
+  ws: string;               //(default: "&nbsp;") character to use as whitespace
+  lineEnd: string;          //(default: "<br/>") character to use as line break
+  numBrackets: number;      //number of colorized distinct brackets. Brackets can be styled with bracket-{number} css class.
 }
-
