@@ -1,7 +1,7 @@
 import { Ast } from "../pq-ast";
 import { Optional } from '../interfaces';
 import { IFormatterConfig } from '../config/definitions';
-import { CommentKind, TComment } from '@microsoft/powerquery-parser/lib/language/comment';
+import { CommentKind, TComment } from '../pq-ast';
 import { ExtendedComment, extendComment } from '../CommentExtension';
 import { defaultFormatterConfig } from '../config/default';
 

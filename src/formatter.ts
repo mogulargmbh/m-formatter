@@ -1,12 +1,10 @@
-import { Task, DefaultSettings, ResultKind, Parser } from '@microsoft/powerquery-parser';
 import { FormatError } from './Error';
 import { extendAll, assignComments } from './Factory';
-import { Ast } from '@microsoft/powerquery-parser/lib/language';
 import { Optional } from './interfaces';
 import { IFormatterConfig } from './config/definitions';
 import { defaultFormatterConfig } from './config/default';
 import { ExtendedNode, IFormatState } from './base/Base';
-import { TComment } from './pq-ast';
+import { TComment, Parser, Task, DefaultSettings, ResultKind, Ast } from './pq-ast';
 
 export function parse(code: string): [Ast.INode, TComment[]]
 {
@@ -15,14 +13,11 @@ export function parse(code: string): [Ast.INode, TComment[]]
     code,
     Parser.IParserStateUtils.stateFactory
   );
+  
   if(parsed.kind == ResultKind.Ok)
-  {
     return [parsed.value.root, parsed.value.lexerSnapshot.comments.slice()];
-  }
   else
-  {
     throw new FormatError("Could not parse code", "PARSER_ERROR", parsed.error);
-  }
 }
 
 export function format(ast: ExtendedNode, formatterConfig: Optional<IFormatterConfig> = null): ExtendedNode

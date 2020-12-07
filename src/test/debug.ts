@@ -9,7 +9,7 @@ import * as TextTests from "./TextSerializer.test";
 import { extendAll, assignComments } from '../Factory';
 import * as fs from "fs";
 import { Optional } from '../interfaces';
-import { TComment } from '@microsoft/powerquery-parser/lib/language/comment';
+import { TComment } from '../pq-ast';
 
 let code = ""
 let c = null;

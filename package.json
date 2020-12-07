@@ -1,6 +1,6 @@
 {
   "name": "@mogulargmbh/m-formatter",
-  "version": "2.0.2",
+  "version": "2.0.4",
   "description": "",
   "main": "./dist/main.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "jsdom": "^16.2.2"
   },
   "dependencies": {
-    "@microsoft/powerquery-parser": "^0.2.8",
+    "@microsoft/powerquery-parser": "0.2.8",
     "escape-html": "^1.0.3"
   }
 }
