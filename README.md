@@ -1,4 +1,5 @@
-This is not an official microsoft repository. There is an official microsoft [powerquery-formatter](https://github.com/microsoft/powerquery-formatter). This formatter aims to provide more configuration options and minimal unnecessary line breaks.
+This is not an official microsoft repository. There is an official microsoft [powerquery-formatter](https://github.com/microsoft/powerquery-formatter). This formatter aims to provide more configuration options and minimal unnecessary line breaks.  
+You can preview this formatter at [powerqueryformatter.com](https://www.powerqueryformatter.com).
 
 # Setup and debug
 - build
@@ -50,12 +51,8 @@ This is not an official microsoft repository. There is an official microsoft [po
   - after formatting all nodes contain a newly computed range. To update the tokenRange with the computed range values call *root.updateTokenRange()*. This will update the original token range that was emitted from the parser and also handles wsBefore and wsAfter correctly.
   - now the formatted node can be serialized using an **IAstSerializer**. There are two options
     - **HtmlAstSerializer**: emits HTML
-    - **TextAstSerializer**: emits Text (currently not very well tested)
+    - **TextAstSerializer**: emits Text
 - For examples look at **./test**
-
-# TODO
-This formatter is not totally finished. It's actually a rewrite of the first version that I built and that is currently accessible at [powerqueryformatter.com](https://www.powerqueryformatter.com). There are still some issues with this newer, much faster and more structured version. For example comments are still causing some problems and some test cases don't pass. Also the configuration parameters are not implemented at the moment! I will get back to fixing that once I return from holidays. Also have a look at the open issues.
-
 
 # HtmlAstSerializer
 Available css classes to style
