@@ -1,6 +1,6 @@
-import { Ast } from '@microsoft/powerquery-parser/lib/language';
+import { Ast } from '../pq-ast';
 import { AlwaysInlineNodeBase } from '../base/AlwaysInline';
-import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension, PrivateNode } from '../base/Base';
+import { FormatGenerator, FormatResult, IPrivateNodeExtension, PrivateNode } from '../base/Base';
 import { NotSupported } from '../Util';
 
 type This = PrivateNode<Ast.LiteralExpression>;

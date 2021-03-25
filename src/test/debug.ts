@@ -80,7 +80,7 @@ function test(code: string)
     // let r = form(code, {lineWidth: 61}, "txt");
     // code = r[0];
     // console.log(r[0]);
-    let [res, ast, comments] = form(code, {wsAfterBrackets: false}, "html", {debugMode: true});
+    let [res, ast, comments] = form(code, {surroundBracesWithWs: false}, "html", {debugMode: true});
     // let ast2 = format(ast, {});
     // let res2 = html.serialize(ast2, {debugMode: true} as any);
     // console.log(res == res2);

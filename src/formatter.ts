@@ -10,8 +10,7 @@ export function parse(code: string): [Ast.INode, TComment[]]
 {
   let parsed = Task.tryLexParse(
     DefaultSettings, 
-    code,
-    Parser.IParserStateUtils.stateFactory
+    code
   );
   
   if(parsed.kind == ResultKind.Ok)

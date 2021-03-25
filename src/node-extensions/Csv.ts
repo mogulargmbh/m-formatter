@@ -1,8 +1,6 @@
-import { TConstant } from '@microsoft/powerquery-parser/lib/language/ast/ast';
-import { format } from 'path';
 import { Ast } from "../pq-ast";
 import { AlwaysInlineNodeBase } from '../base/AlwaysInline';
-import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension, PrivateNode } from '../base/Base';
+import { ExtendedNode, FormatGenerator, FormatResult, IEnumerable, IPrivateNodeExtension, PrivateNode } from '../base/Base';
 import { NotSupported } from '../Util';
 
 type ICsvOpts = any
@@ -19,7 +17,7 @@ function *_formatInline(this: This): FormatGenerator
   if(this.maybeCommaConstant)
   {
     s = this.subState(this.node.outerRange.end);
-    yield this.maybeCommaConstant.format(s);
+    yield this.maybeCommaConstant.format(s, 0, 1);
   }
   
   this.setInnerRangeEnd(this.lastChild());

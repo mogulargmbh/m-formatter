@@ -1,7 +1,7 @@
 import { Ast } from "../pq-ast";
-import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension } from '../base/Base';
+import { ExtendedNode, FormatGenerator, FormatResult, IEnumerable, IPrivateNodeExtension } from '../base/Base';
 import { BreakOnAnyChildBrokenNodeBase } from '../base/BreakOnAnyChild';
-import { NotSupported } from '../Util';
+import { isBracketNode } from "../Util";
 
 type NodeType = Ast.FieldSelector
   | Ast.ItemAccessExpression;
@@ -25,7 +25,6 @@ function *_formatInline(this: This): FormatGenerator
     s = this.subState(this.closeWrapperConstant.outerRange.end);
     yield this.maybeOptionalConstant.format(s);
   }
-    
   return FormatResult.Ok;
 }
 

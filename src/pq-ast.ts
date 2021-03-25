@@ -1,8 +1,12 @@
+
 export { Parser, Task, DefaultSettings, ResultKind } from '@microsoft/powerquery-parser';
-export * from "@microsoft/powerquery-parser/lib/language/ast";
-export { LiteralKind, TConstantKind, PrimitiveTypeConstantKind } from "@microsoft/powerquery-parser/lib/language/constant/constant";
-export { LexerSnapshot} from "@microsoft/powerquery-parser/lib/lexer";
-export { CommentKind, TComment } from '@microsoft/powerquery-parser/lib/language/comment';
+export { NodeKind, TConstant } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/ast/ast';
+export * from "@microsoft/powerquery-parser/lib/powerquery-parser/language/ast";
+export { TConstantKind, PrimitiveTypeConstantKind } from "@microsoft/powerquery-parser/lib/powerquery-parser/language/constant/constant";
+export { LexerSnapshot} from "@microsoft/powerquery-parser/lib/powerquery-parser/lexer";
+export { CommentKind, TComment } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/comment';
+
+
 
 // import { TComment } from '../pq-ast';
 

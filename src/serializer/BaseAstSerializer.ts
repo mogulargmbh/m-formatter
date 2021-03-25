@@ -1,8 +1,8 @@
 import { Cursor, ExtendedNode, traverse } from '../base/Base';
-import { TokenPosition } from '@microsoft/powerquery-parser/lib/language/token';
 import { IAstSerializer } from './IAstSerializer';
 import { Optional } from '../interfaces';
 import { FormatError } from '../Error';
+import { TokenPosition } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/token';
 
 export type WritableTokenPosition = {
   lineNumber: number,

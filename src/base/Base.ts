@@ -50,7 +50,7 @@ export type OptionalFormatState = Optional<IFormatState>;
 export interface IPublicNodeExtension
 {
   respectsWhitespace?: boolean;
-  takesLeadingComments?: boolean,
+  takesLeadingComments?: boolean;
   getContentString?(): string;
   _ext: string;
 }
@@ -65,7 +65,8 @@ export interface INodeExtensionBase
   leadingComments: ExtendedComment[];
   trailingComments: ExtendedComment[];
   parent: ExtendedNode;
-  prev: ExtendedNode;
+  prevNode: ExtendedNode;
+  nextNode: ExtendedNode;
   isBroken: boolean;
   state: IFormatState;
   wsBefore: number;
@@ -73,7 +74,7 @@ export interface INodeExtensionBase
   outerRange: Range;
   innerRange: Range;
   children: PublicExtendedNode[];
-  config: IFormatterConfig,
+  config: IFormatterConfig;
   initialize: (parent: ExtendedNode) => void;
   hasContentString: () => boolean;
   subState: (state?: OptionalFormatState) => IFormatState;
@@ -93,6 +94,8 @@ export interface INodeExtensionBase
   finishFormat: () => void;
   formatLeadingComments: () => [FormatResult, IFormatState];
   formatTrailingComments: () => [FormatResult, IFormatState];
+  getPreviousTextNode(): ExtendedNode;
+  getNextTextNode(): ExtendedNode;
 }
 
 export interface IBaseNode<T = any> extends INodeExtensionBase
@@ -184,7 +187,8 @@ export const NodeExtensionBase: INodeExtensionBase =
   _id: null,
   _formatCnt: 0,
   parent: null,
-  prev: null,
+  prevNode: null,
+  nextNode: null,
   state: null,
   isBroken: false,
   wsBefore: null,
@@ -240,7 +244,7 @@ export const NodeExtensionBase: INodeExtensionBase =
     this.wsBefore = wsBefore ?? 0;
     this.wsAfter  = wsAfter ?? 0;
     this.config   = this.state.config;
-    if(this.prev && this.prev.trailingComments.any(c => c.kind == CommentKind.Line && this.prev.outerRange.end.line == this.state.line))
+    if(this.prevNode && this.prevNode.trailingComments.any(c => c.kind == CommentKind.Line && this.prevNode.outerRange.end.line == this.state.line))
     {
       this.state = this.parent.subState({
         unit: this.indentUnit(this.state.indent),
@@ -381,7 +385,23 @@ export const NodeExtensionBase: INodeExtensionBase =
     this.leadingComments.forEach(c => c.updateTokenRange());
     this.children.forEach(c => c.updateTokenRange());
     this.trailingComments.forEach(c => c.updateTokenRange());
-  }
+  },
+  getPreviousTextNode: function(this: PrivateExtendedNode) {
+    let curr = this.prevNode;
+    while(curr != null && typeof curr.getContentString != "function")
+    {
+      curr = curr.prevNode;
+    }
+    return curr;
+  },
+  getNextTextNode: function(this: PrivateExtendedNode){
+    let curr = this.nextNode;
+    while(curr != null && typeof curr.getContentString != "function")
+    {
+      curr = curr.nextNode;
+    }
+    return curr;
+  },
   // format: function*(this: PrivateExtendedNode, state: IFormatState, wsBefore: number = null, wsAfter: number = null): FormatResult {
   //   this._formatCnt++;
   //   this.state    = state;

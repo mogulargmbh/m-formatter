@@ -1,6 +1,6 @@
 import { Optional } from '../interfaces';
 import { Ast } from "../pq-ast";
-import { ExtendedNode, FormatGenerator, FormatResult, genRes, IEnumerable, IPrivateNodeExtension, PrivateExtendedNode, PrivateNode } from '../base/Base';
+import { ExtendedNode, FormatGenerator, FormatResult, IEnumerable, IPrivateNodeExtension, PrivateNode } from '../base/Base';
 import { BreakOnAnyChildBrokenNodeBase } from '../base/BreakOnAnyChild';
 import { PairedExpressionOpts } from './PairedExpression';
 import { AlignmentStrategy } from '../config/definitions';
@@ -64,7 +64,7 @@ function *_formatInline(this: This): FormatGenerator
       line,
       unit,
     });
-    yield c.format(s, this.opts.inlineWsBefore(c,i,this.elements.length), this.opts.inlineWsAfter(c,i,this.elements.length));
+    yield c.format(s, this.opts.inlineWsBefore(c, i, this.elements.length), this.opts.inlineWsAfter(c, i, this.elements.length));
       
     line = c.outerRange.end.line;
     unit = c.outerRange.end.unit;
@@ -176,7 +176,7 @@ function *_children(this: This): IEnumerable<ExtendedNode>
 
 const defaultOpts: IArrayWrapperOpts = {
   inlineWsBefore: (n, i, l) => 0,
-  inlineWsAfter: (n, i, l) => i == (l-1) ? 0 : 1
+  inlineWsAfter: (n, i, l) => i == (l-1) ? 0 : 0
 }
 
 export const ArrayWrapperExtension: IPrivateNodeExtension<Optional<IArrayWrapperOpts>> = {

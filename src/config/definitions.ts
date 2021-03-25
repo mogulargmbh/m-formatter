@@ -14,6 +14,7 @@ export interface IFormatterConfig
   alignLineCommentsToPosition: number;                      //(default=null) align line end comments (starting with "//" and in non empty code lines) to a specific position. Null of no alignment should happen.
   includeComments: boolean;                                 //(default=true) toggle include or exclude comments
   indentSectionMembers: boolean;                            //(default=true) toggle indentation of section members
+  surroundBracesWithWs: boolean;
   //newlineCsvInLet
 }
 
