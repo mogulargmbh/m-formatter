@@ -68,12 +68,10 @@ export function getBracketsWsInline(node: ExtendedNode<BracketNode>): {openBefor
 export function getBracketWsBroken(node: ExtendedNode<BracketNode>): number
 {
   if(node.config.wsAfterBrackets !== true)
-  {
-    0;
-  }
+    return 0;
   
   let prev = node.getPreviousTextNode();
-  if(prev != null && prev.innerRange.end.line == node.innerRange.start.line)
+  if(prev != null && prev.innerRange.end.line == node.innerRange.start.line && prev.wsAfter == 0)
     return 1;
   return 0;
 }
