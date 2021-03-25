@@ -1,7 +1,6 @@
-import { TConstant } from '@microsoft/powerquery-parser/lib/language/ast/ast';
 import { Ast } from "../pq-ast";
 import { AlwaysInlineNodeBase } from '../base/AlwaysInline';
-import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension } from '../base/Base';
+import { ExtendedNode, FormatGenerator, FormatResult, IPrivateNodeExtension } from '../base/Base';
 import { NotSupported } from '../Util';
 
 type NodeType = Ast.TableType;

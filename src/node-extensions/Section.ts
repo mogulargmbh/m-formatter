@@ -1,6 +1,5 @@
-import { TConstant } from '@microsoft/powerquery-parser/lib/language/ast/ast';
 import { Ast } from "../pq-ast";
-import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension } from '../base/Base';
+import { ExtendedNode, FormatResult, IPrivateNodeExtension } from '../base/Base';
 import { NotSupported } from '../Util';
 import { AlwaysBreakingNodeBase } from '../base/AlwaysBreaking';
 

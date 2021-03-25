@@ -1,7 +1,7 @@
 import { Ast } from "../pq-ast";
-import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension } from '../base/Base';
+import { ExtendedNode, FormatGenerator, FormatResult, IEnumerable, IPrivateNodeExtension } from '../base/Base';
 import { BreakOnAnyChildBrokenNodeBase } from '../base/BreakOnAnyChild';
-import { NotSupported } from '../Util';
+import { isBracketNode, getBracketsWsInline, getBracketWsBroken } from '../Util';
 
 type NodeType = Ast.ParenthesizedExpression;
   
@@ -11,20 +11,23 @@ type This = ExtendedNode<NodeType>;
 
 function *_formatInline(this: This): FormatGenerator
 {
-  yield this.openWrapperConstant.format(this.subState());
+  let ws = getBracketsWsInline(this);
+  
+  yield this.openWrapperConstant.format(this.subState(), ws.openBefore, ws.openAfter);
   
   let s = this.subState(this.openWrapperConstant.outerRange.end);
   yield this.content.format(s);
   
   s = this.subState(this.content.outerRange.end);
-  yield this.closeWrapperConstant.format(s);
+  yield this.closeWrapperConstant.format(s, ws.closeBefore, ws.closeAfter);
     
   return FormatResult.Ok;
 }
 
 function _formatBroken(this: This): FormatResult
 {
-  this.openWrapperConstant.format(this.subState());
+  let ws = getBracketWsBroken(this);
+  this.openWrapperConstant.format(this.subState(), ws, 0);
   
   let s = this.subState({
     line: this.state.line + 1,

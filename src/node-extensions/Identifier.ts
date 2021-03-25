@@ -1,4 +1,3 @@
-import { TConstant } from '@microsoft/powerquery-parser/lib/language/ast/ast';
 import { Ast } from "../pq-ast";
 import { AlwaysInlineNodeBase } from '../base/AlwaysInline';
 import { IPrivateNodeExtension, ExtendedNode, IFormatState, FormatResult, FormatNodeKind, FormatGenerator } from '../base/Base';

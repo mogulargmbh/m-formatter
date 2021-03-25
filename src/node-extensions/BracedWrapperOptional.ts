@@ -1,7 +1,7 @@
 import { Ast } from "../pq-ast";
-import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension } from '../base/Base';
+import { ExtendedNode, FormatGenerator, FormatResult, IEnumerable, IPrivateNodeExtension } from '../base/Base';
 import { BreakOnAnyChildBrokenNodeBase } from '../base/BreakOnAnyChild';
-import { NotSupported } from '../Util';
+import { isBracketNode } from "../Util";
 
 type NodeType = Ast.FieldSelector
   | Ast.ItemAccessExpression;
@@ -10,22 +10,47 @@ type This = ExtendedNode<NodeType>;
 
 //TODO: review
 
+//TODO: ws before brackets? what about FieldSpecificationList
+
 function *_formatInline(this: This): FormatGenerator
 {
-  yield this.openWrapperConstant.format(this.subState());
-  
-  let s = this.subState(this.openWrapperConstant.outerRange.end);
-  yield this.content.format(s);
-  
-  s = this.subState(this.content.outerRange.end);
-  yield this.closeWrapperConstant.format(s);
-  
-  if(this.maybeOptionalConstant)
-  {
-    s = this.subState(this.closeWrapperConstant.outerRange.end);
-    yield this.maybeOptionalConstant.format(s);
-  }
+  // if(this.kind == Ast.NodeKind.ItemAccessExpression && this.config.wsAfterBrackets == true)
+  // {
+  //   let hasContent = this.content != null && this.content.children.length != 0;
+  //   let prev = this.getPreviousTextNode();
+  //   let next = this.getNextTextNode();
+  //   let ws = this.config.wsAfterBrackets == true && hasContent ? 1 : 0;
     
+  //   yield this.openWrapperConstant.format(this.subState(), prev == null || (prev.respectsWhitespace && prev.wsAfter) > 0 ? 0 : ws, ws);
+    
+  //   let s = this.subState(this.openWrapperConstant.outerRange.end);
+  //   yield this.content.format(s);
+    
+  //   s = this.subState(this.content.outerRange.end);
+  //   yield this.closeWrapperConstant.format(s, next == null || isBracketNode(next) ? 0 : ws);
+    
+  //   if(this.maybeOptionalConstant)
+  //   {
+  //     s = this.subState(this.closeWrapperConstant.outerRange.end);
+  //     yield this.maybeOptionalConstant.format(s);
+  //   }
+  // }
+  // else
+  // {
+    yield this.openWrapperConstant.format(this.subState());
+    
+    let s = this.subState(this.openWrapperConstant.outerRange.end);
+    yield this.content.format(s);
+    
+    s = this.subState(this.content.outerRange.end);
+    yield this.closeWrapperConstant.format(s);
+    
+    if(this.maybeOptionalConstant)
+    {
+      s = this.subState(this.closeWrapperConstant.outerRange.end);
+      yield this.maybeOptionalConstant.format(s);
+    }
+  // }
   return FormatResult.Ok;
 }
 

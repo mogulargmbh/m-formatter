@@ -1,8 +1,6 @@
-import { TConstant } from '@microsoft/powerquery-parser/lib/language/ast/ast';
 import { Ast } from "../pq-ast";
-import { ExtendedNode, FormatGenerator, FormatNodeKind, FormatResult, IEnumerable, IPrivateNodeExtension, PrivateNode } from '../base/Base';
+import { FormatGenerator, FormatResult, IPrivateNodeExtension, PrivateNode } from '../base/Base';
 import { BreakOnLineEndNodeBase } from '../base/BreakOnLineEnd';
-import { NotSupported } from '../Util';
 
 type PairedExpression = Ast.IdentifierPairedExpression 
   | Ast.GeneralizedIdentifierPairedExpression

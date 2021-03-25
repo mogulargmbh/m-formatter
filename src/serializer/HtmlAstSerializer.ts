@@ -1,15 +1,14 @@
 import { ExtendedNode, FormatNodeKind, Range } from '../base/Base';
 import { TextAstSerializer, WritableTokenPosition } from './TextAstSerializer';
 import * as escapeHtml from 'escape-html';
-import { NodeKind, TConstant } from '@microsoft/powerquery-parser/lib/language/ast/ast';
-import { Ast } from '@microsoft/powerquery-parser/lib/language';
-import { ArithmeticOperatorKind, EqualityOperatorKind, IdentifierConstantKind, KeywordConstantKind, LiteralKind, LogicalOperatorKind, MiscConstantKind, PrimitiveTypeConstantKind, RelationalOperatorKind, TConstantKind, UnaryOperatorKind, WrapperConstantKind } from '@microsoft/powerquery-parser/lib/language/constant/constant';
 import { assertnever } from '../Util';
 import { BaseAstSerializer } from './BaseAstSerializer';
 import { IHtmlAstSerializerConfig } from '../config/definitions';
 import { defaultHtmlSerializerConfig } from '../config/default';
 import { ExtendedComment } from '../CommentExtension';
-import { CommentKind } from '../pq-ast';
+import { Ast, CommentKind, NodeKind, TConstantKind, TConstant } from '../pq-ast';
+import { ArithmeticOperatorKind, EqualityOperatorKind, KeywordConstantKind, LanguageConstantKind, LogicalOperatorKind, MiscConstantKind, PrimitiveTypeConstantKind, RelationalOperatorKind, UnaryOperatorKind, WrapperConstantKind } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/constant/constant';
+import { LiteralKind } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/ast/ast';
 
 export type literalClass = "string" | "list" | "boolean" | "number" | "null" | "record";
 export type operatorConstantClass = "operator" | "operator-keyword" | "operator-arithmetic" | "operator-equality" | "operator-logical" | "operator-relational" | "operator-unary" | "operator-keyword";
@@ -40,8 +39,8 @@ function getConstantTokenClass(constantKind: TConstantKind, state: {bracket: num
 {
   switch(constantKind)
   {
-    case IdentifierConstantKind.Nullable:
-    case IdentifierConstantKind.Optional:
+    case LanguageConstantKind.Nullable:
+    case LanguageConstantKind.Optional:
       return ["type", "type-modifier"];
     case ArithmeticOperatorKind.Addition:
     case ArithmeticOperatorKind.And:
@@ -70,8 +69,6 @@ function getConstantTokenClass(constantKind: TConstantKind, state: {bracket: num
     case MiscConstantKind.Ellipsis:
     case MiscConstantKind.DotDot:
       return ["operator"]
-    case KeywordConstantKind.And:
-    case KeywordConstantKind.Or:
     case KeywordConstantKind.As:
     case KeywordConstantKind.Is: 
     case LogicalOperatorKind.And: //indistinguishable from Keyword

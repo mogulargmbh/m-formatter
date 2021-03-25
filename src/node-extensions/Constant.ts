@@ -1,7 +1,7 @@
-import { TConstant } from '@microsoft/powerquery-parser/lib/language/ast/ast';
 import { IPrivateNodeExtension, PrivateNode, FormatResult, FormatGenerator } from '../base/Base';
 import { NotSupported } from '../Util';
 import { AlwaysInlineNodeBase } from '../base/AlwaysInline';
+import { TConstant } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/ast/ast';
 
 type This = PrivateNode<TConstant>;
 

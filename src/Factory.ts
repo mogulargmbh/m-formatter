@@ -38,7 +38,12 @@ export function assignComments(ast: ExtendedNode, comments: TComment[])
   let lastTakesCommentNode: ExtendedNode = null;
   for(let n of flatEnumerateAst(ast))
   {
-    n.prev = lastNode;
+    if(lastNode)
+    {
+      n.prevNode = lastNode;
+      lastNode.nextNode = n;
+    }
+      
     if(n.takesLeadingComments != false)
     {
       for(let c of getLeadingComments(n, comments))

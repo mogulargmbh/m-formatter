@@ -1,6 +1,7 @@
+
 export {};
 
-declare module "@microsoft/powerquery-parser/lib/language/ast/ast"
+declare module "@microsoft/powerquery-parser/lib/powerquery-parser/language"
 {
   interface INode
   {
