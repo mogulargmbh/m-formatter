@@ -12,22 +12,20 @@ import { formatCode, parse } from '../formatter';
 
 const serializer = new HtmlAstSerializer();
 
-export function runTests(cases: TestCase[]): number
+export function runTests(cases: TestCase[], formatterConfig: Optional<IFormatterConfig>): number
 {
-  let results = cases.map(c => runTestCase(c));
+  let results = cases.map(c => runTestCase(c, formatterConfig));
   let page = buildTestPage(results);
   fs.writeFileSync("./testPage.html", page);
   return results.reduce((c,v) => c += v.error != null ? 1 : 0, 0)
 }
 
-export function runTestCase(c: TestCase): TestResult
+export function runTestCase(c: TestCase, formatterConfig: Optional<IFormatterConfig>): TestResult
 {
   let {identifier, code } = c;
   try
   {
     console.log(`Running HtmlSerializer test ${identifier}`);
-    let formatterConfig: Optional<IFormatterConfig> = {
-    };
     let htmlSerializerConfig: Optional<IHtmlAstSerializerConfig> = {
       debugMode: true
     };

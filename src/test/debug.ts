@@ -17,11 +17,36 @@ const txt = new TextAstSerializer();
 const html = new HtmlAstSerializer();
 
 let cases = getCases();
-c = cases[46];
+c = cases[48];
 
 // let code = "\nlet \n  GetParameterImpl=(tableName as any, keyName) as any => \n    let\n      value = Table.SelectRows(tableData, each ([Key] = keyName)){0}[Value],\n      tableData = Excel.CurrentWorkbook(){[Name=tableName]}[Content]\n    in \n      value,\n  GetParameterImpl=(t) as null => testtttttttttt,\n  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = @test,\n  Test=Number.Add\nin \n  GetParameterImpl"
 // let connectorCases = getConnectorCases();
 // c = connectorCases.find(c => c.identifier == "SqlODBC.pq");
+
+// code = `
+// let
+// 	Source        = Sales[Order Date],
+// 	DistinctDates = List.Buffer(List.Distinct(Sales[Order Date])),
+// 	DateList      =
+//         let
+// 	      ConstYear        = 1,
+// 	      MinDate          = List.Min(DistinctDates),
+// 	      MinYear          = Date.Year(MinDate) - ConstYear,
+// 	      MaxDate          = List.Max(DistinctDates),
+// 	      MaxYear          = Date.Year(MaxDate) + ConstYear,
+// 	      FirstDate        = #date(MinYear, 1, 1),
+// 	      LastDate         = #date(MaxYear, 12, 31),
+// 	      ListOfDate       = {Number.From(FirstDate) .. Number.From(LastDate)},
+// 	      ConvertToTable   = Table.FromList(ListOfDate, Splitter.SplitByNothing()),
+// 	      ChangeColumnName = Table.RenameColumns(ConvertToTable, {{"Column1", "Date"}}) + 3,
+// 	      ChangeType       = Table.TransformColumnTypes(ChangeColumnName, {{"Date", type date}})
+//         in
+// 	      ChangeType,
+// 	YearNumber    = Table.AddColumn(DateList, "Calendar Year Number", each Date.Year([Date]), Int64.Type),
+// 	YearText      = Table.AddColumn(YearNumber, "Calendar Year", each "CY " & Text.From([Calendar Year Number]), type text)
+// in
+// 	YearText
+// `
 
 code = c.code;
 
@@ -55,7 +80,7 @@ function test(code: string)
     // let r = form(code, {lineWidth: 61}, "txt");
     // code = r[0];
     // console.log(r[0]);
-    let [res, ast, comments] = form(code, {}, "html", {debugMode: true});
+    let [res, ast, comments] = form(code, {wsAfterBrackets: false}, "html", {debugMode: true});
     // let ast2 = format(ast, {});
     // let res2 = html.serialize(ast2, {debugMode: true} as any);
     // console.log(res == res2);
@@ -81,7 +106,8 @@ function writeDiffFiles(r1, r2)
 
 function debugTest()
 {
-  let r = TextTests.runTestCase(c);
+  let formatterConfig: Optional<IFormatterConfig> = {};
+  let r = TextTests.runTestCase(c, formatterConfig);
   if(r.error)
   {
     if(r.error instanceof TestError)

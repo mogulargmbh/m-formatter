@@ -8,9 +8,9 @@ import { formatCode, format, parse, extendAndFormat } from '../formatter';
 
 const serializer = new TextAstSerializer();
 
-export function runTests(cases: TestCase[]): number
+export function runTests(cases: TestCase[], formatterConfig: Optional<IFormatterConfig>): number
 {
-  let results = cases.map(c => runTestCase(c));
+  let results = cases.map(c => runTestCase(c, formatterConfig));
   let page = results.reduce((c,v) => {
     c += v.case.identifier + "-".repeat(50 - v.case.identifier.length) + "\n\n";
     if(v.error)
@@ -25,14 +25,12 @@ export function runTests(cases: TestCase[]): number
   return results.reduce((c,v) => c += v.error != null ? 1 : 0, 0)
 }
 
-export function runTestCase(c: TestCase): TestResult
+export function runTestCase(c: TestCase, formatterConfig: Optional<IFormatterConfig>): TestResult
 {
   let { identifier, code } = c;
   try
   {
     console.log(`Running TextSerializer test ${identifier}`);
-    let formatterConfig: Optional<IFormatterConfig> = {
-    };
     let textSerializerConfig: Optional<ITextAstSerializerConfig> = {
     };
     

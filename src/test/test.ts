@@ -4,6 +4,8 @@ import * as HtmlTest from "./HtmlSerializer.test"
 import * as TxtTest from "./TextSerializer.test"
 import * as fs from "fs";
 import "../extensions"
+import { Optional } from '../interfaces';
+import { IFormatterConfig } from '../main';
 
 let errorDir = TestError.ErrorDir;
 if(fs.existsSync(errorDir) == false)
@@ -17,8 +19,11 @@ async function main()
   ];
   
   let errors = 0;
-  errors += TxtTest.runTests(cases);
-  errors += HtmlTest.runTests(cases);
+  let formatterConfig: Optional<IFormatterConfig> = {
+    wsAfterBrackets: true
+  }
+  errors += TxtTest.runTests(cases, formatterConfig);
+  errors += HtmlTest.runTests(cases, formatterConfig);
   
   console.log(`Tests finished, errors: ${errors}`);
 }
