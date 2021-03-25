@@ -10,7 +10,7 @@ export const defaultFormatterConfig: IFormatterConfig = {
   includeComments: true,
   alignLineCommentsToPosition: null,
   indentSectionMembers: true,
-  wsAfterBrackets: false
+  surroundBracesWithWs: false
   // newLineCsvInLet: false,
 }
 

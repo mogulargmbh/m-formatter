@@ -20,7 +20,7 @@ async function main()
   
   let errors = 0;
   let formatterConfig: Optional<IFormatterConfig> = {
-    wsAfterBrackets: true
+    surroundBracesWithWs: true
   }
   errors += TxtTest.runTests(cases, formatterConfig);
   errors += HtmlTest.runTests(cases, formatterConfig);

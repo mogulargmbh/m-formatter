@@ -41,7 +41,7 @@ type BracketNode = Ast.ParenthesizedExpression
   | Ast.FieldSpecificationList;
 export function getBracketsWsInline(node: ExtendedNode<BracketNode>): {openBefore: number, openAfter: number, closeBefore: number, closeAfter: number}
 {
-  if(node.config.wsAfterBrackets !== true)
+  if(node.config.surroundBracesWithWs !== true)
   {
     return {
       openBefore: 0,
@@ -55,7 +55,7 @@ export function getBracketsWsInline(node: ExtendedNode<BracketNode>): {openBefor
   if(prev != null && prev.innerRange.start.line != node.innerRange.start.line)
     prev = null;
   let next = node.getNextTextNode();
-  let ws = node.config.wsAfterBrackets == true && hasContent ? 1 : 0;
+  let ws = node.config.surroundBracesWithWs == true && hasContent ? 1 : 0;
   
   return {
     openBefore: prev == null || isBracketNode(prev) || (prev.respectsWhitespace && prev.wsAfter) > 0 ? 0 : ws,
@@ -67,7 +67,7 @@ export function getBracketsWsInline(node: ExtendedNode<BracketNode>): {openBefor
 
 export function getBracketWsBroken(node: ExtendedNode<BracketNode>): number
 {
-  if(node.config.wsAfterBrackets !== true)
+  if(node.config.surroundBracesWithWs !== true)
     return 0;
   
   let prev = node.getPreviousTextNode();
