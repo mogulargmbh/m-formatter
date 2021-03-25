@@ -2,8 +2,6 @@ node_modules
 *.sass
 dist
 *.tgz
-testPage.html
-testText.txt
 debug*.pq
 test-errors
 /*.txt
