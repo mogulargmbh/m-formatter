@@ -24,7 +24,7 @@
     "jsdom": "^16.2.2"
   },
   "dependencies": {
-    "@microsoft/powerquery-parser": "^0.2.16",
+    "@microsoft/powerquery-parser": "0.4.15",
     "escape-html": "^1.0.3"
   }
 }

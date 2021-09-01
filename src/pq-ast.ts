@@ -1,5 +1,5 @@
 
-export { Parser, Task, DefaultSettings, ResultKind } from '@microsoft/powerquery-parser';
+export { Parser, Task, TaskUtils, DefaultSettings, ResultKind } from '@microsoft/powerquery-parser';
 export { NodeKind, TConstant } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/ast/ast';
 export * from "@microsoft/powerquery-parser/lib/powerquery-parser/language/ast";
 export { TConstantKind, PrimitiveTypeConstantKind } from "@microsoft/powerquery-parser/lib/powerquery-parser/language/constant/constant";

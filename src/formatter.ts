@@ -4,17 +4,17 @@ import { Optional } from './interfaces';
 import { IFormatterConfig } from './config/definitions';
 import { defaultFormatterConfig } from './config/default';
 import { ExtendedNode, IFormatState } from './base/Base';
-import { TComment, Parser, Task, DefaultSettings, ResultKind, Ast } from './pq-ast';
+import { TComment, TaskUtils, DefaultSettings, ResultKind, Ast } from './pq-ast';
 
 export function parse(code: string): [Ast.INode, TComment[]]
 {
-  let parsed = Task.tryLexParse(
+  let parsed = TaskUtils.tryLexParse(
     DefaultSettings, 
     code
   );
   
-  if(parsed.kind == ResultKind.Ok)
-    return [parsed.value.root, parsed.value.lexerSnapshot.comments.slice()];
+  if(parsed.resultKind == ResultKind.Ok)
+    return [parsed.ast, parsed.lexerSnapshot.comments.slice()];
   else
     throw new FormatError("Could not parse code", "PARSER_ERROR", parsed.error);
 }
