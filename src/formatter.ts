@@ -6,9 +6,9 @@ import { defaultFormatterConfig } from './config/default';
 import { ExtendedNode, IFormatState } from './base/Base';
 import { TComment, TaskUtils, DefaultSettings, ResultKind, Ast } from './pq-ast';
 
-export function parse(code: string): [Ast.INode, TComment[]]
+export async function parse(code: string): Promise<[Ast.INode, TComment[]]>
 {
-  let parsed = TaskUtils.tryLexParse(
+  let parsed =  await TaskUtils.tryLexParse(
     DefaultSettings, 
     code
   );
@@ -60,11 +60,11 @@ export function extendAndFormat(ast: Ast.INode, comments: TComment[], formatterC
   
 }
 
-export function formatCode(code: string, config: Optional<IFormatterConfig> = null): ExtendedNode
+export async function formatCode(code: string, config: Optional<IFormatterConfig> = null): Promise<ExtendedNode>
 {
   try
   {
-    let [ast, comments] = parse(code);
+    let [ast, comments] = await parse(code);
     return extendAndFormat(ast, comments, config);
   }
   catch(err)

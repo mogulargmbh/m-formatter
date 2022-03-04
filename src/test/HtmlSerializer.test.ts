@@ -12,15 +12,17 @@ import { formatCode, parse } from '../formatter';
 
 const serializer = new HtmlAstSerializer();
 
-export function runTests(cases: TestCase[], formatterConfig: Optional<IFormatterConfig>): number
+export async function runTests(cases: TestCase[], formatterConfig: Optional<IFormatterConfig>): Promise<number>
 {
-  let results = cases.map(c => runTestCase(c, formatterConfig));
+  let results = await Promise.all(
+    cases.map(c => runTestCase(c, formatterConfig))
+  );
   let page = buildTestPage(results);
   fs.writeFileSync("./testPage.html", page);
   return results.reduce((c,v) => c += v.error != null ? 1 : 0, 0)
 }
 
-export function runTestCase(c: TestCase, formatterConfig: Optional<IFormatterConfig>): TestResult
+export async function runTestCase(c: TestCase, formatterConfig: Optional<IFormatterConfig>): Promise<TestResult>
 {
   let {identifier, code } = c;
   try
@@ -31,7 +33,7 @@ export function runTestCase(c: TestCase, formatterConfig: Optional<IFormatterCon
     };
     
     let start       = performance.now();
-    let ast         = formatCode(code, formatterConfig);
+    let ast         = await formatCode(code, formatterConfig);
     let result      = serializer.serialize(ast, htmlSerializerConfig);
     let end         = performance.now();
     

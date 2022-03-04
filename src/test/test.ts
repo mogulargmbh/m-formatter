@@ -22,8 +22,8 @@ async function main()
   let formatterConfig: Optional<IFormatterConfig> = {
     surroundBracesWithWs: true
   }
-  errors += TxtTest.runTests(cases, formatterConfig);
-  errors += HtmlTest.runTests(cases, formatterConfig);
+  errors += await TxtTest.runTests(cases, formatterConfig);
+  errors += await HtmlTest.runTests(cases, formatterConfig);
   
   console.log(`Tests finished, errors: ${errors}`);
 }

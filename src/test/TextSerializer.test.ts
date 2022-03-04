@@ -8,9 +8,11 @@ import { formatCode, format, parse, extendAndFormat } from '../formatter';
 
 const serializer = new TextAstSerializer();
 
-export function runTests(cases: TestCase[], formatterConfig: Optional<IFormatterConfig>): number
+export async function runTests(cases: TestCase[], formatterConfig: Optional<IFormatterConfig>): Promise<number>
 {
-  let results = cases.map(c => runTestCase(c, formatterConfig));
+  let results = await Promise.all(
+    cases.map(c => runTestCase(c, formatterConfig))
+  );
   let page = results.reduce((c,v) => {
     c += v.case.identifier + "-".repeat(50 - v.case.identifier.length) + "\n\n";
     if(v.error)
@@ -25,7 +27,7 @@ export function runTests(cases: TestCase[], formatterConfig: Optional<IFormatter
   return results.reduce((c,v) => c += v.error != null ? 1 : 0, 0)
 }
 
-export function runTestCase(c: TestCase, formatterConfig: Optional<IFormatterConfig>): TestResult
+export async function runTestCase(c: TestCase, formatterConfig: Optional<IFormatterConfig>): Promise<TestResult>
 {
   let { identifier, code } = c;
   try
@@ -35,7 +37,7 @@ export function runTestCase(c: TestCase, formatterConfig: Optional<IFormatterCon
     };
     
     let start              = performance.now();
-    let [parsed, comments] = parse(code);
+    let [parsed, comments] = await parse(code);
     let ast                = extendAndFormat(parsed, comments, formatterConfig);
     let result             = serializer.serialize(ast, textSerializerConfig);
     let end                = performance.now();

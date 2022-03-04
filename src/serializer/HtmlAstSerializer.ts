@@ -6,9 +6,9 @@ import { BaseAstSerializer } from './BaseAstSerializer';
 import { IHtmlAstSerializerConfig } from '../config/definitions';
 import { defaultHtmlSerializerConfig } from '../config/default';
 import { ExtendedComment } from '../CommentExtension';
-import { Ast, CommentKind, NodeKind, TConstantKind, TConstant } from '../pq-ast';
-import { ArithmeticOperatorKind, EqualityOperatorKind, KeywordConstantKind, LanguageConstantKind, LogicalOperatorKind, MiscConstantKind, PrimitiveTypeConstantKind, RelationalOperatorKind, UnaryOperatorKind, WrapperConstantKind } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/constant/constant';
-import { LiteralKind } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/ast/ast';
+import { Ast, CommentKind, NodeKind, TConstant } from '../pq-ast';
+import { ArithmeticOperator, EqualityOperator, KeywordConstant, LanguageConstant, LogicalOperator, MiscConstant, PrimitiveTypeConstant, RelationalOperator, UnaryOperator, WrapperConstant } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/constant/constant';
+import { IConstant, LiteralKind } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/ast/ast';
 
 export type literalClass = "string" | "list" | "boolean" | "number" | "null" | "record";
 export type operatorConstantClass = "operator" | "operator-keyword" | "operator-arithmetic" | "operator-equality" | "operator-logical" | "operator-relational" | "operator-unary" | "operator-keyword";
@@ -35,100 +35,101 @@ export function getTokenClasses(node: Ast.INode, state: {bracket: number}, numBr
   }
 }
 
-function getConstantTokenClass(constantKind: TConstantKind, state: {bracket: number}, numBrackets: number): tokenClass[]
+
+function getConstantTokenClass(constantKind: TConstant, state: {bracket: number}, numBrackets: number): tokenClass[]
 {
   switch(constantKind)
   {
-    case LanguageConstantKind.Nullable:
-    case LanguageConstantKind.Optional:
+    case LanguageConstant.Nullable:
+    case LanguageConstant.Optional:
       return ["type", "type-modifier"];
-    case ArithmeticOperatorKind.Addition:
-    case ArithmeticOperatorKind.And:
-    case ArithmeticOperatorKind.Division:
-    case ArithmeticOperatorKind.Multiplication:
-    case ArithmeticOperatorKind.Subtraction:
+    case ArithmeticOperator.Addition:
+    case ArithmeticOperator.And:
+    case ArithmeticOperator.Division:
+    case ArithmeticOperator.Multiplication:
+    case ArithmeticOperator.Subtraction:
       return ["operator", "operator-arithmetic"]
-    case EqualityOperatorKind.EqualTo:
-    case EqualityOperatorKind.NotEqualTo:
+    case EqualityOperator.EqualTo:
+    case EqualityOperator.NotEqualTo:
       return ["operator", "operator-equality"]
-    case RelationalOperatorKind.GreaterThan:
-    case RelationalOperatorKind.GreaterThanEqualTo:
-    case RelationalOperatorKind.LessThan:
-    case RelationalOperatorKind.LessThanEqualTo:
+    case RelationalOperator.GreaterThan:
+    case RelationalOperator.GreaterThanEqualTo:
+    case RelationalOperator.LessThan:
+    case RelationalOperator.LessThanEqualTo:
       return ["operator", "operator-relational"]
-    case UnaryOperatorKind.Negative:
-    case UnaryOperatorKind.Not:
-    case UnaryOperatorKind.Positive:
+    case UnaryOperator.Negative:
+    case UnaryOperator.Not:
+    case UnaryOperator.Positive:
       return ["operator", "operator-unary"]
-    case MiscConstantKind.QuestionMark:
-    case MiscConstantKind.Equal:
-    case MiscConstantKind.AtSign:
-    case MiscConstantKind.NullCoalescingOperator:
-    case MiscConstantKind.QuestionMark:
-    case MiscConstantKind.FatArrow:
-    case MiscConstantKind.Ellipsis:
-    case MiscConstantKind.DotDot:
+    case MiscConstant.QuestionMark:
+    case MiscConstant.Equal:
+    case MiscConstant.AtSign:
+    case MiscConstant.NullCoalescingOperator:
+    case MiscConstant.QuestionMark:
+    case MiscConstant.FatArrow:
+    case MiscConstant.Ellipsis:
+    case MiscConstant.DotDot:
       return ["operator"]
-    case KeywordConstantKind.As:
-    case KeywordConstantKind.Is: 
-    case LogicalOperatorKind.And: //indistinguishable from Keyword
-    case LogicalOperatorKind.Or:  //indistinguishable from Keyword
+    case KeywordConstant.As:
+    case KeywordConstant.Is: 
+    case LogicalOperator.And: //indistinguishable from Keyword
+    case LogicalOperator.Or:  //indistinguishable from Keyword
       return ["keyword", "operator", "operator-keyword"]
-    case KeywordConstantKind.Each:
-    case KeywordConstantKind.Else:
-    case KeywordConstantKind.Error:
-    case KeywordConstantKind.False:
-    case KeywordConstantKind.If:
-    case KeywordConstantKind.In:
-    case KeywordConstantKind.Let:
-    case KeywordConstantKind.Meta:
-    case KeywordConstantKind.Otherwise:
-    case KeywordConstantKind.Section:
-    case KeywordConstantKind.Shared:
-    case KeywordConstantKind.Then:
-    case KeywordConstantKind.True:
-    case KeywordConstantKind.Try:
-    case KeywordConstantKind.Type:
+    case KeywordConstant.Each:
+    case KeywordConstant.Else:
+    case KeywordConstant.Error:
+    case KeywordConstant.False:
+    case KeywordConstant.If:
+    case KeywordConstant.In:
+    case KeywordConstant.Let:
+    case KeywordConstant.Meta:
+    case KeywordConstant.Otherwise:
+    case KeywordConstant.Section:
+    case KeywordConstant.Shared:
+    case KeywordConstant.Then:
+    case KeywordConstant.True:
+    case KeywordConstant.Try:
+    case KeywordConstant.Type:
       return ["keyword"]
-    case PrimitiveTypeConstantKind.Action:
-    case PrimitiveTypeConstantKind.Any:
-    case PrimitiveTypeConstantKind.AnyNonNull:
-    case PrimitiveTypeConstantKind.Binary:
-    case PrimitiveTypeConstantKind.Date:
-    case PrimitiveTypeConstantKind.DateTime:
-    case PrimitiveTypeConstantKind.DateTimeZone:
-    case PrimitiveTypeConstantKind.Duration:
-    case PrimitiveTypeConstantKind.Function:
-    case PrimitiveTypeConstantKind.List:
-    case PrimitiveTypeConstantKind.Logical:
-    case PrimitiveTypeConstantKind.None:
-    case PrimitiveTypeConstantKind.Null:
-    case PrimitiveTypeConstantKind.Number:
-    case PrimitiveTypeConstantKind.Record:
-    case PrimitiveTypeConstantKind.Table:
-    case PrimitiveTypeConstantKind.Text:
-    case PrimitiveTypeConstantKind.Time:
-    case PrimitiveTypeConstantKind.Type:
+    case PrimitiveTypeConstant.Action:
+    case PrimitiveTypeConstant.Any:
+    case PrimitiveTypeConstant.AnyNonNull:
+    case PrimitiveTypeConstant.Binary:
+    case PrimitiveTypeConstant.Date:
+    case PrimitiveTypeConstant.DateTime:
+    case PrimitiveTypeConstant.DateTimeZone:
+    case PrimitiveTypeConstant.Duration:
+    case PrimitiveTypeConstant.Function:
+    case PrimitiveTypeConstant.List:
+    case PrimitiveTypeConstant.Logical:
+    case PrimitiveTypeConstant.None:
+    case PrimitiveTypeConstant.Null:
+    case PrimitiveTypeConstant.Number:
+    case PrimitiveTypeConstant.Record:
+    case PrimitiveTypeConstant.Table:
+    case PrimitiveTypeConstant.Text:
+    case PrimitiveTypeConstant.Time:
+    case PrimitiveTypeConstant.Type:
       return ["type", "type-primitive"]
-    case WrapperConstantKind.LeftBrace:
-    case WrapperConstantKind.LeftBracket:            
-    case WrapperConstantKind.LeftParenthesis:
+    case WrapperConstant.LeftBrace:
+    case WrapperConstant.LeftBracket:            
+    case WrapperConstant.LeftParenthesis:
     {
       let res = ["bracket", `bracket-${state.bracket % numBrackets}` as any]
       state.bracket++;
       return res;
     }
-    case WrapperConstantKind.RightBrace:
-    case WrapperConstantKind.RightBracket:
-    case WrapperConstantKind.RightParenthesis:
+    case WrapperConstant.RightBrace:
+    case WrapperConstant.RightBracket:
+    case WrapperConstant.RightParenthesis:
     {
       state.bracket--;
       let res = ["bracket", `bracket-${state.bracket % numBrackets}` as any]
       return res;
     }
-    case MiscConstantKind.Ampersand:
-    case MiscConstantKind.Comma:
-    case MiscConstantKind.Semicolon:
+    case MiscConstant.Ampersand:
+    case MiscConstant.Comma:
+    case MiscConstant.Semicolon:
       return [];
     default: 
       assertnever(constantKind)
@@ -174,19 +175,19 @@ export class HtmlAstSerializer extends BaseAstSerializer<{ bracket: number } & W
     };
   }
   
-  isConstant(n: ExtendedNode): n is ExtendedNode<TConstant>
+  isConstant(n: ExtendedNode): n is ExtendedNode<IConstant<TConstant>>
   {
     return n.kind == Ast.NodeKind.Constant;
   }
   
   isOpenBracket(n: ExtendedNode)
   {
-    return this.isConstant(n) && (n.constantKind == WrapperConstantKind.LeftBrace || n.constantKind == WrapperConstantKind.LeftBracket || n.constantKind == WrapperConstantKind.LeftParenthesis)
+    return this.isConstant(n) && (n.constantKind == WrapperConstant.LeftBrace || n.constantKind == WrapperConstant.LeftBracket || n.constantKind == WrapperConstant.LeftParenthesis)
   }
   
   isCloseBracket(n: ExtendedNode)
   {
-    return this.isConstant(n) && (n.constantKind == WrapperConstantKind.RightBrace || n.constantKind == WrapperConstantKind.RightBracket || n.constantKind == WrapperConstantKind.RightParenthesis)
+    return this.isConstant(n) && (n.constantKind == WrapperConstant.RightBrace || n.constantKind == WrapperConstant.RightBracket || n.constantKind == WrapperConstant.RightParenthesis)
   }
   
   printRange(range: Range)

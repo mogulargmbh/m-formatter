@@ -62,9 +62,9 @@ test(code);
 
 
 
-function form(code: string, config: Optional<IFormatterConfig>, result: "txt"|"html", serializerConfig = null): [code: string, ast: ExtendedNode, comments: TComment[]]
+async function form(code: string, config: Optional<IFormatterConfig>, result: "txt"|"html", serializerConfig = null): Promise<[code: string, ast: ExtendedNode, comments: TComment[]]>
 {
-  let [ast, comments] = parse(code);
+  let [ast, comments] = await parse(code);
   let ext = extendAll(ast);
   assignComments(ext, comments.slice());
   let formatted = format(ext, config);
@@ -73,14 +73,14 @@ function form(code: string, config: Optional<IFormatterConfig>, result: "txt"|"h
   return [r, ext, comments];
 }
 
-function test(code: string)
+async function test(code: string)
 {
   try
   {
     // let r = form(code, {lineWidth: 61}, "txt");
     // code = r[0];
     // console.log(r[0]);
-    let [res, ast, comments] = form(code, {surroundBracesWithWs: false}, "html", {debugMode: true});
+    let [res, ast, comments] = await form(code, {surroundBracesWithWs: false}, "html", {debugMode: true});
     // let ast2 = format(ast, {});
     // let res2 = html.serialize(ast2, {debugMode: true} as any);
     // console.log(res == res2);
@@ -104,10 +104,10 @@ function writeDiffFiles(r1, r2)
   fs.writeFileSync("./debug2.txt", r2);
 }
 
-function debugTest()
+async function debugTest()
 {
   let formatterConfig: Optional<IFormatterConfig> = {};
-  let r = TextTests.runTestCase(c, formatterConfig);
+  let r = await TextTests.runTestCase(c, formatterConfig);
   if(r.error)
   {
     if(r.error instanceof TestError)
