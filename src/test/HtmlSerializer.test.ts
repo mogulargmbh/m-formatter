@@ -14,9 +14,12 @@ const serializer = new HtmlAstSerializer();
 
 export async function runTests(cases: TestCase[], formatterConfig: Optional<IFormatterConfig>): Promise<number>
 {
-  let results = await Promise.all(
-    cases.map(c => runTestCase(c, formatterConfig))
-  );
+  let results: TestResult[] = [];
+  for(let c of cases)
+  {
+    let r = await runTestCase(c, formatterConfig);
+    results.push(r);
+  }
   let page = buildTestPage(results);
   fs.writeFileSync("./testPage.html", page);
   return results.reduce((c,v) => c += v.error != null ? 1 : 0, 0)
@@ -61,10 +64,10 @@ ${result}
     if(is != should)
       throw new TestError("Html result does not match source", identifier, null, is, should);
       
-    //check if textContent can be parsed
+    // check if textContent can be parsed
     // try
     // {
-    //   parse(content);
+    //   await parse(content);
     // }
     // catch(error)
     // {

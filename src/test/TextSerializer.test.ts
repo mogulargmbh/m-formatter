@@ -10,9 +10,12 @@ const serializer = new TextAstSerializer();
 
 export async function runTests(cases: TestCase[], formatterConfig: Optional<IFormatterConfig>): Promise<number>
 {
-  let results = await Promise.all(
-    cases.map(c => runTestCase(c, formatterConfig))
-  );
+  let results: TestResult[] = [];
+  for(let c of cases)
+  {
+    let r = await runTestCase(c, formatterConfig);
+    results.push(r);
+  }
   let page = results.reduce((c,v) => {
     c += v.case.identifier + "-".repeat(50 - v.case.identifier.length) + "\n\n";
     if(v.error)
@@ -50,7 +53,7 @@ export async function runTestCase(c: TestCase, formatterConfig: Optional<IFormat
     
     try
     {
-      parse(result); //check if result can be parsed
+      await parse(result); //check if result can be parsed
     }
     catch(error)
     {
@@ -64,7 +67,7 @@ export async function runTestCase(c: TestCase, formatterConfig: Optional<IFormat
       throw new TestError("Converted tab indentation text result does not match source", identifier, null, is, should);
     try
     {
-      parse(converted); //check if result can be parsed
+      await parse(converted); //check if result can be parsed
     }
     catch(error)
     {
