@@ -6,7 +6,7 @@ import { BaseAstSerializer } from './BaseAstSerializer';
 import { IHtmlAstSerializerConfig } from '../config/definitions';
 import { defaultHtmlSerializerConfig } from '../config/default';
 import { ExtendedComment } from '../CommentExtension';
-import { Ast, CommentKind, NodeKind, TConstant } from '../pq-ast';
+import { Ast, CommentKind, TConstant } from '../pq-ast';
 import { ArithmeticOperator, EqualityOperator, KeywordConstant, LanguageConstant, LogicalOperator, MiscConstant, PrimitiveTypeConstant, RelationalOperator, UnaryOperator, WrapperConstant } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/constant/constant';
 import { IConstant, LiteralKind } from '@microsoft/powerquery-parser/lib/powerquery-parser/language/ast/ast';
 
@@ -21,14 +21,14 @@ export function getTokenClasses(node: Ast.INode, state: {bracket: number}, numBr
 {
   switch(node.kind)
   {
-    case NodeKind.Constant:
+    case Ast.NodeKind.Constant:
       return ["constant", ...getConstantTokenClass((node as ExtendedNode<Ast.TConstant>).constantKind, state, numBrackets)];
-    case NodeKind.LiteralExpression:
+    case Ast.NodeKind.LiteralExpression:
       return ["literal", getLiteralTokenClass((node as ExtendedNode<Ast.LiteralExpression>).literalKind)];
-    case NodeKind.Identifier:
-    case NodeKind.GeneralizedIdentifier:
+    case Ast.NodeKind.Identifier:
+    case Ast.NodeKind.GeneralizedIdentifier:
       return ["identifier"];
-    case NodeKind.PrimitiveType:
+    case Ast.NodeKind.PrimitiveType:
       return ["type"];
     default:
       return null;

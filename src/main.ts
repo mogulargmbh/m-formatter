@@ -6,5 +6,5 @@ export { FormatError, ErrorKind, GenericError } from "./Error";
 export * from "./config/definitions";
 export { extendAll } from './Factory';
 export { format, formatCode, parse } from "./formatter";
-export { Ast, Parser as PqParser } from "./pq-ast";
+export { Parser as PqParser, Ast} from "./pq-ast";
 export * as Util from "./Util";
