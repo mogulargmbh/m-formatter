@@ -50,6 +50,7 @@ c = cases[48];
 
 code = c.code;
 
+code = `let 零 = 1 in 零`
 
 // let code = `
 // section test;
@@ -58,7 +59,7 @@ code = c.code;
 
 
 // debugTest();
-test(code);
+test(code).then(() => console.log("----------\nfin"));
 
 
 
@@ -80,7 +81,7 @@ async function test(code: string)
     // let r = form(code, {lineWidth: 61}, "txt");
     // code = r[0];
     // console.log(r[0]);
-    let [res, ast, comments] = await form(code, {surroundBracesWithWs: false}, "html", {debugMode: true});
+    let [res, ast, comments] = await form(code, {surroundBracesWithWs: false}, "txt", {debugMode: true});
     // let ast2 = format(ast, {});
     // let res2 = html.serialize(ast2, {debugMode: true} as any);
     // console.log(res == res2);
