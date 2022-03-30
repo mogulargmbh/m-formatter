@@ -1,6 +1,6 @@
 {
   "name": "@mogulargmbh/m-formatter",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "",
   "main": "./dist/main.js",
   "scripts": {
