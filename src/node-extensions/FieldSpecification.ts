@@ -13,16 +13,16 @@ function *_formatInline(this: This): FormatGenerator
   yield this.name.format(s);
   
   let end = this.name.outerRange.end;
-  if(this.maybeOptionalConstant)
+  if(this.optionalConstant)
   {
     s = this.subState(this.name.outerRange.end);
-    yield this.maybeOptionalConstant.format(s)
-    end = this.maybeOptionalConstant.outerRange.end;
+    yield this.optionalConstant.format(s)
+    end = this.optionalConstant.outerRange.end;
   }
-  if(this.maybeFieldTypeSpecification)
+  if(this.fieldTypeSpecification)
   {
     let s = this.subState(end);
-    yield this.maybeFieldTypeSpecification.format(s);
+    yield this.fieldTypeSpecification.format(s);
   }
   
   this.setInnerRangeEnd(this.lastChild())
@@ -32,8 +32,8 @@ function *_formatInline(this: This): FormatGenerator
 function *_children(this: This)
 {
   yield this.name;
-  yield this.maybeOptionalConstant;
-  yield this.maybeFieldTypeSpecification;
+  yield this.optionalConstant;
+  yield this.fieldTypeSpecification;
 }
 
 export const FieldSpecificationExtension: IPrivateNodeExtension = {

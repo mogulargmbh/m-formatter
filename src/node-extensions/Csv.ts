@@ -14,10 +14,10 @@ function *_formatInline(this: This): FormatGenerator
   });
   yield this.node.format(s, null, null, this.opts);
     
-  if(this.maybeCommaConstant)
+  if(this.commaConstant)
   {
     s = this.subState(this.node.outerRange.end);
-    yield this.maybeCommaConstant.format(s, 0, 1);
+    yield this.commaConstant.format(s, 0, 1);
   }
   
   this.setInnerRangeEnd(this.lastChild());
@@ -27,7 +27,7 @@ function *_formatInline(this: This): FormatGenerator
 function *_children(this: This): IEnumerable<ExtendedNode>
 {
   yield this.node;
-  yield this.maybeCommaConstant;
+  yield this.commaConstant;
 }
 
 const defaultOpts = {

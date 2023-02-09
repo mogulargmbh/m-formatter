@@ -89,6 +89,7 @@ function getConstantTokenClass(constantKind: TConstant, state: {bracket: number}
     case KeywordConstant.Then:
     case KeywordConstant.True:
     case KeywordConstant.Try:
+    case LanguageConstant.Catch: //TODO: makes sence?
     case KeywordConstant.Type:
       return ["keyword"]
     case PrimitiveTypeConstant.Action:

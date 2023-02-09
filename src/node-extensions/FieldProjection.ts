@@ -16,8 +16,8 @@ function *_formatInline(this: This): FormatGenerator
   s = this.subState(this.content.outerRange.end);
   yield this.closeWrapperConstant.format(s);
   
-  if(this.maybeOptionalConstant)
-    yield this.maybeOptionalConstant.format(this.subState(this.closeWrapperConstant.outerRange.end));
+  if(this.optionalConstant)
+    yield this.optionalConstant.format(this.subState(this.closeWrapperConstant.outerRange.end));
     
   return FormatResult.Ok;
 }
@@ -41,8 +41,8 @@ function _formatBroken(this: This)
     indent: this.state.indent
   }));
   
-  if(this.maybeOptionalConstant)
-    this.maybeOptionalConstant.format(this.subState(this.closeWrapperConstant.outerRange.end));
+  if(this.optionalConstant)
+    this.optionalConstant.format(this.subState(this.closeWrapperConstant.outerRange.end));
   
   return FormatResult.Ok;
 }
@@ -52,7 +52,7 @@ function *_children(this: This): IEnumerable<ExtendedNode>
   yield this.openWrapperConstant;
   yield this.content;
   yield this.closeWrapperConstant;
-  yield this.maybeOptionalConstant;
+  yield this.optionalConstant;
 }
 
 export const FieldProjectionExtension: IPrivateNodeExtension = {

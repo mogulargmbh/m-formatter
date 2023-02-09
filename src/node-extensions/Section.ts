@@ -10,12 +10,12 @@ type This = ExtendedNode<PairedExpression>;
 function _formatBroken(this: This): FormatResult
 {
   let s = this.subState();
-  if(this.maybeLiteralAttributes)
+  if(this.literalAttributes)
   {
-    this.maybeLiteralAttributes.format(s);
+    this.literalAttributes.format(s);
       
     s = this.subState({
-      line: this.maybeLiteralAttributes.outerRange.end.line + 1,
+      line: this.literalAttributes.outerRange.end.line + 1,
       unit: this.currIndentUnit(),
     });
   }
@@ -23,10 +23,10 @@ function _formatBroken(this: This): FormatResult
   this.sectionConstant.format(s, 0, 1);
   
   s = this.subState(this.sectionConstant.outerRange.end);
-  if(this.maybeName)
+  if(this.name)
   {
-    this.maybeName.format(s);
-    s = this.subState(this.maybeName.outerRange.end);
+    this.name.format(s);
+    s = this.subState(this.name.outerRange.end);
   }
   
   this.semicolonConstant.format(s);
@@ -45,9 +45,9 @@ function _formatBroken(this: This): FormatResult
 
 function *_children(this: This)
 {
-  yield this.maybeLiteralAttributes;
+  yield this.literalAttributes;
   yield this.sectionConstant;
-  yield this.maybeName;
+  yield this.name;
   yield this.semicolonConstant;
   yield this.sectionMembers;
 }

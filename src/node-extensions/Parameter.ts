@@ -10,18 +10,18 @@ type This = ExtendedNode<NodeType>;
 function *_formatInline(this: This): FormatGenerator
 {
   let s = this.subState();
-  if(this.maybeOptionalConstant)
+  if(this.optionalConstant)
   {
-    yield this.maybeOptionalConstant.format(s, 0, 1);
-    s = this.subState(this.maybeOptionalConstant.outerRange.end);
+    yield this.optionalConstant.format(s, 0, 1);
+    s = this.subState(this.optionalConstant.outerRange.end);
   }
   
   yield this.name.format(s);
   
-  if(this.maybeParameterType)
+  if(this.parameterType)
   {
     s = this.subState(this.name.outerRange.end);
-    yield this.maybeParameterType.format(s)
+    yield this.parameterType.format(s)
   }
     
   this.setInnerRangeEnd(this.lastChild());
@@ -30,9 +30,9 @@ function *_formatInline(this: This): FormatGenerator
 
 function *_children(this: This)
 {
-  yield this.maybeOptionalConstant;
+  yield this.optionalConstant;
   yield this.name;
-  yield this.maybeParameterType;
+  yield this.parameterType;
 }
 
 export const ParameterExtension: IPrivateNodeExtension = {

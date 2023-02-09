@@ -14,10 +14,10 @@ function *_formatInline(this: This): FormatGenerator
   yield this.parameters.format(s);
   
   s = this.subState(this.parameters.outerRange.end);
-  if(this.maybeFunctionReturnType)
+  if(this.functionReturnType)
   {
-    yield this.maybeFunctionReturnType.format(s)
-    s = this.subState(this.maybeFunctionReturnType.outerRange.end);
+    yield this.functionReturnType.format(s)
+    s = this.subState(this.functionReturnType.outerRange.end);
   }
   
   yield this.fatArrowConstant.format(s, 1, 1);
@@ -50,10 +50,10 @@ function _formatBroken(this: This): FormatResult
   this.parameters.format(s);
   
   s = this.subState(this.parameters.outerRange.end);
-  if(this.maybeFunctionReturnType)
+  if(this.functionReturnType)
   {
-    this.maybeFunctionReturnType.format(s);
-    s = this.subState(this.maybeFunctionReturnType.outerRange.end);
+    this.functionReturnType.format(s);
+    s = this.subState(this.functionReturnType.outerRange.end);
   }
   
   this.fatArrowConstant.format(s, 1, 0);
@@ -85,7 +85,7 @@ function _formatBroken(this: This): FormatResult
 function *_children(this: This): IEnumerable<ExtendedNode>
 {
   yield this.parameters;
-  yield this.maybeFunctionReturnType;
+  yield this.functionReturnType;
   yield this.fatArrowConstant;
   yield this.expression;
 }

@@ -2,7 +2,7 @@ import { Ast } from "../pq-ast";
 import { ExtendedNode, FormatGenerator, FormatResult, IPrivateNodeExtension } from '../base/Base';
 import { BreakOnAnyChildBrokenNodeBase } from '../base/BreakOnAnyChild';
 
-type NodeType = Ast.ErrorHandlingExpression;
+type NodeType = Ast.ErrorHandlingOtherwiseExpression | Ast.ErrorHandlingCatchExpression;
   
 type This = ExtendedNode<NodeType>;
 
@@ -14,10 +14,10 @@ function *_formatInline(this: This): FormatGenerator
   s = this.subState(this.tryConstant.outerRange.end);
   yield this.protectedExpression.format(s);
     
-  if(this.maybeOtherwiseExpression)
+  if(this.handler)
   {
     s = this.subState(this.protectedExpression.outerRange.end);
-    yield this.maybeOtherwiseExpression.format(s, 1, 0);
+    yield this.handler.format(s, 1, 0);
   }
   
   return FormatResult.Ok;
@@ -48,7 +48,7 @@ function _formatBroken(this: This): FormatResult
     indent: this.state.indent + 1,
   }));
   
-  if(this.maybeOtherwiseExpression)
+  if(this.handler)
   {
     let s = this.subState({
       line: this.protectedExpression.outerRange.end.line + 1,
@@ -56,7 +56,7 @@ function _formatBroken(this: This): FormatResult
       unit: this.currIndentUnit(),
       forceLineBreak: true
     })
-    this.maybeOtherwiseExpression.format(s);
+    this.handler.format(s);
   }
   
   return FormatResult.Ok;
@@ -66,7 +66,7 @@ function *_children(this: This)
 {
   yield this.tryConstant;
   yield this.protectedExpression;
-  yield this.maybeOtherwiseExpression;
+  yield this.handler;
 }
 
 

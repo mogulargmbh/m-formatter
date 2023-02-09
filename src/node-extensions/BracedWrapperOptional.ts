@@ -20,10 +20,10 @@ function *_formatInline(this: This): FormatGenerator
   s = this.subState(this.content.outerRange.end);
   yield this.closeWrapperConstant.format(s);
   
-  if(this.maybeOptionalConstant)
+  if(this.optionalConstant)
   {
     s = this.subState(this.closeWrapperConstant.outerRange.end);
-    yield this.maybeOptionalConstant.format(s);
+    yield this.optionalConstant.format(s);
   }
   return FormatResult.Ok;
 }
@@ -47,10 +47,10 @@ function _formatBroken(this: This): FormatResult
   });
   this.closeWrapperConstant.format(s);
   
-  if(this.maybeOptionalConstant)
+  if(this.optionalConstant)
   {
     s = this.subState(this.closeWrapperConstant.outerRange.end);
-    this.maybeOptionalConstant.format(s);
+    this.optionalConstant.format(s);
   }
   
   return FormatResult.Ok;
@@ -61,8 +61,8 @@ function *_children(this: This): IEnumerable<ExtendedNode>
   yield this.openWrapperConstant;
   yield this.content;
   yield this.closeWrapperConstant;
-  if(this.maybeOptionalConstant)
-    yield this.maybeOptionalConstant;
+  if(this.optionalConstant)
+    yield this.optionalConstant;
 }
 
 export const BracedWrapperOptionalExtension: IPrivateNodeExtension = {

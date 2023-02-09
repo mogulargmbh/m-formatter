@@ -174,6 +174,7 @@ export function getExtension(kind: Ast.NodeKind): IPrivateNodeExtension
     case Ast.NodeKind.IsNullablePrimitiveType:
     case Ast.NodeKind.NullablePrimitiveType:
     case Ast.NodeKind.OtherwiseExpression:
+    case Ast.NodeKind.CatchExpression:
     case Ast.NodeKind.TypePrimaryType:
       return PairedConstantExtension;
     case Ast.NodeKind.ErrorHandlingExpression:

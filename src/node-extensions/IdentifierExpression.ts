@@ -8,10 +8,10 @@ type This = ExtendedNode<Ast.IdentifierExpression>;
 function *_formatInline(this: This): FormatGenerator
 {
   let end = this.subState();
-  if(this.maybeInclusiveConstant)
+  if(this.inclusiveConstant)
   {
-    yield this.maybeInclusiveConstant.format(this.subState());
-    end = this.subState(this.maybeInclusiveConstant.outerRange.end);
+    yield this.inclusiveConstant.format(this.subState());
+    end = this.subState(this.inclusiveConstant.outerRange.end);
   }
   yield this.identifier.format(end);
   this.setInnerRangeEnd(this.identifier);
@@ -19,7 +19,7 @@ function *_formatInline(this: This): FormatGenerator
 
 function *_children(this: This)
 {
-  yield this.maybeInclusiveConstant;
+  yield this.inclusiveConstant;
   yield this.identifier;
 }
 
