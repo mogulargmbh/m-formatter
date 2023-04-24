@@ -50,7 +50,48 @@ c = cases[48];
 
 code = c.code;
 
-code = `let 零 = 1 in 零`
+code = `
+let
+  fn = (Start_Year as number, End_Year as number) =>
+    let
+      monthList = List.Generate(
+        () => #date(Start_Year, 1, 1),  // Starting value
+        each _ <= #date(End_Year, 12, 31),  // Create only when <= 31 dec 2024
+        each Date.AddMonths(_, 1)
+      ), 
+      build_Table = Table.FromList(
+        monthList, 
+        Splitter.SplitByNothing(), 
+        type table [Date = Date.Type], 
+        null, 
+        ExtraValues.Error
+      ), 
+      add_Records = Table.AddColumn(
+        build_Table, 
+        "_Table", 
+        each [
+          Year = Date.Year([Date]),  // Returns the year number
+          Month = Date.MonthName([Date]),  // Returns month name
+          MonthNUM = Date.Month([Date]),  // Returns Month Number
+          MonthYEAR
+            = Date.ToText(
+            [Date], 
+            "MMM-yy"
+          ) // Returns Short Month and Year, e.g. Jan 2023                                                                                                                                                                                                                                                                                                                                  
+        ], 
+        type [Year = number, Month = text, MonthNUM = number, MonthYEAR = text]
+      ), 
+      expandColumns = Table.ExpandRecordColumn(
+        add_Records, 
+        "_Table", 
+        {"Year", "Month", "MonthNUM", "MonthYEAR"}, 
+        {"Year", "Month", "MonthNUM", "MonthYEAR"}
+      )
+    in
+      expandColumns
+in
+  fn
+`
 
 // let code = `
 // section test;

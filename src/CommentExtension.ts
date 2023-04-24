@@ -122,7 +122,7 @@ const CommentExtensionBase: ICommentExtensionBase = {
           this.range.start = {
             line,
             unit
-          }
+          };
         }
         
         let lines = 0;
@@ -159,54 +159,5 @@ const CommentExtensionBase: ICommentExtensionBase = {
         assertnever(this.commentKind);
       }
     }
-    
-    // if((this.trailingNewLine == true || this.leadingNewLine == true) && state.stopOnLineBreak == true)
-    //   return FormatResult.Break;
-    
-    // if(this.leadingNewLine == true && suppressLeadingLineBreak == false)
-    // {
-    //   if(state.suppressInitialLineBreak != true)
-    //     line = state.line + 1;
-        
-    //   unit = config.indentationLength * state.indent;
-    //   this.range.start = {
-    //     line,
-    //     unit,
-    //   }
-    //   unit += this.data.length;
-    //   this.range.end = {
-    //     line,
-    //     unit
-    //   }
-    // }
-    // else
-    // {
-    //   line = state.line;
-    //   unit = state.unit;
-    //   this.range.start = {
-    //     line,
-    //     unit
-    //   }
-      
-    //   unit += this.data.length;
-    //   this.range.end = {
-    //     line,
-    //     unit: unit
-    //   }
-    // }
-    
-    // if(this.trailingNewLine == true)
-    // {
-    //   unit = config.indentationLength * state.indent;
-    //   line++;
-    // }
-    
-    // let resultState = {
-    //   ...state,
-    //   line,
-    //   unit
-    // }
-    
-    return FormatResult.Ok;
   }
 }

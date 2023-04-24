@@ -35,6 +35,7 @@ export class TextAstSerializer extends BaseAstSerializer<WritableTokenPosition, 
     else
     {
       result += c.data;
+      this.state.lineCodeUnit += c.data.length;
     }
     result += this.moveCursor(c.positionEnd);
     return result;
