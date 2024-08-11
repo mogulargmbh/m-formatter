@@ -15,6 +15,7 @@ export interface IFormatterConfig
   includeComments: boolean;                                 //(default=true) toggle include or exclude comments
   indentSectionMembers: boolean;                            //(default=true) toggle indentation of section members
   surroundBracesWithWs: boolean;
+  replaceLfInStrings: boolean;                              //(default=false) replace #lf in strings with newline
   //newlineCsvInLet
 }
 

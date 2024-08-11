@@ -10,8 +10,9 @@ export const defaultFormatterConfig: IFormatterConfig = {
   includeComments: true,
   alignLineCommentsToPosition: null,
   indentSectionMembers: true,
-  surroundBracesWithWs: false
+  surroundBracesWithWs: false,
   // newLineCsvInLet: false,
+  replaceLfInStrings: false
 }
 
 export var defaultTextSerializerConfig: ITextAstSerializerConfig = {

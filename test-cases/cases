@@ -1338,3 +1338,9 @@ let k = null ?? 10 in k
 
 let 零 = 1 in 零
 
+---55
+
+let
+Source = Odbc.Query("dsn=DenodoODBC", "SELECT #(lf) #(lf) ""Company EDC ID"",#(lf) ""Company Name"",#(lf) ""Activity ID"",#(lf) ""Activity Type"", #(lf) ""Activity Description"",#(lf) ""Activity Status""#(lf)#(lf)#(lf) FROM admin.ei_sales.sales_activities")
+in
+Source
