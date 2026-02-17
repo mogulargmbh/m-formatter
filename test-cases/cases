@@ -1344,3 +1344,29 @@ let
 Source = Odbc.Query("dsn=DenodoODBC", "SELECT #(lf) #(lf) ""Company EDC ID"",#(lf) ""Company Name"",#(lf) ""Activity ID"",#(lf) ""Activity Type"", #(lf) ""Activity Description"",#(lf) ""Activity Status""#(lf)#(lf)#(lf) FROM admin.ei_sales.sales_activities")
 in
 Source
+
+
+---56 
+ 
+let 
+  Source = Table.AddColumn( 
+    test, 
+    "asd", 
+    each [ 
+      asd     = "123", 
+      test123 = "123", 
+      test123 = "123", 
+      test123 = "123", 
+      test123 = "123", 
+      test123 = "123" 
+    ], 
+    type [ 
+      asd = Int64.Type, 
+      test123 = Int64.Type, 
+      test123 = Int64.Type, 
+      test123 = Int64.Type, 
+      test123 = Int64.Type 
+    ] 
+  ) 
+in 
+  #"Added Index Column"
